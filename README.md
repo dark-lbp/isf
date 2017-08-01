@@ -21,7 +21,7 @@ ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工
 
 # 安装
 
-## 依赖环境
+## python依赖环境
 * gnureadline (OSX only)
 * requests
 * paramiko
@@ -32,7 +32,6 @@ ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工
 ## 在Kali2中安装
     git clone https://github.com/dark-lbp/isf/
     cd isf
-    pip install -r requirements.txt
     python isf.py
 
 

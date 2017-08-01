@@ -3,8 +3,8 @@
 # Author: WenZhe Zhu
 from icssploit.core.base import Base
 from icssploit.protocols.modbus_tcp import *
+from icssploit.thirdparty.bitstring import BitArray
 from scapy.supersocket import StreamSocket
-from bitstring import BitArray
 
 
 class ModbusClient(Base):
