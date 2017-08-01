@@ -125,3 +125,7 @@ ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工
     References:
     
     isf (S7-300/400 PLC Control) >
+    
+# 说明文档
+* [Modbus-TCP客户端工具使用说明](https://github.com/dark-lbp/isf/blob/master/docs/modbus_tcp_client.md)
+* [SNMP爆破工具使用说明](https://github.com/dark-lbp/isf/blob/master/docs/snmp_bruteforce.md)
