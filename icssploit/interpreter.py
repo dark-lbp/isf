@@ -208,7 +208,7 @@ class IcssploitInterpreter(BaseInterpreter):
 Note     : ICSSPOLIT is fork from routersploit at 
            https://github.com/reverse-shell/routersploit
 Dev Team : wenzhe zhu(dark-lbp)
-Version  : 1.0
+Version  : 0.1.0
 
 Exploits: {exploits_count} Scanners: {scanners_count} Creds: {creds_count}
 
