@@ -7,7 +7,6 @@ import logging.handlers
 import os
 
 from icssploit.interpreter import IcssploitInterpreter
-from icssploit.utils import create_exploit
 
 log_handler = logging.handlers.RotatingFileHandler(filename='icssploit.log', maxBytes=500000)
 log_formatter = logging.Formatter('%(asctime)s %(levelname)s %(name)s       %(message)s')

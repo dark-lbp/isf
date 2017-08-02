@@ -27,7 +27,7 @@ ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工
 * paramiko
 * beautifulsoup4
 * pysnmp
-* scapy
+* scapy [强烈建议参考官方文档手动安装最新版](http://scapy.readthedocs.io/en/latest/installation.html)
 
 ## 在Kali 中安装
     git clone https://github.com/dark-lbp/isf/
@@ -128,3 +128,5 @@ ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工
 # 说明文档
 * [Modbus-TCP客户端工具使用说明](https://github.com/dark-lbp/isf/blob/master/docs/modbus_tcp_client.md)
 * [SNMP爆破工具使用说明](https://github.com/dark-lbp/isf/blob/master/docs/snmp_bruteforce.md)
+* [从额外的目录中读取modules](https://github.com/dark-lbp/isf/blob/master/docs/load_extra_modules_from_folder.md)
+* [如何创建一个module](https://github.com/dark-lbp/isf/blob/master/docs/how_to_create_module.md)
