@@ -172,10 +172,9 @@ class IcssploitInterpreter(BaseInterpreter):
     show [info|options|devices]         Print information, options, or target devices for a module
     check                               Check if a given target is vulnerable to a selected module's exploit"""
 
-    def __init__(self):
+    def __init__(self, extra_package_path=None):
         super(IcssploitInterpreter, self).__init__()
         PrinterThread().start()
-
         self.current_module = None
         self.raw_prompt_template = None
         self.module_prompt_template = None
@@ -186,12 +185,16 @@ class IcssploitInterpreter(BaseInterpreter):
         self.module_commands = ['run', 'back', 'set ', 'setg ', 'check']
         self.module_commands.extend(self.global_commands)
         self.module_commands.sort()
-
+        self.extra_modules_dir = None
+        self.extra_modules_dirs = None
+        self.extra_modules = []
+        self.extra_package_path = extra_package_path
+        self.import_extra_package()
         self.modules = utils.index_modules()
+        self.modules += self.extra_modules
         self.modules_count = Counter()
         [self.modules_count.update(module.split('.')) for module in self.modules]
         self.main_modules_dirs = [module for module in os.listdir(utils.MODULES_DIR) if not module.startswith("__")]
-
         self.__parse_prompt()
 
         self.banner = """ 
@@ -215,9 +218,9 @@ Exploits: {exploits_count} Scanners: {scanners_count} Creds: {creds_count}
 ICS Exploits:
     PLC: {plc_exploit_count}          ICS Switch: {ics_switch_exploits_count}
     Software: {ics_software_exploits_count}
-""".format(exploits_count=self.modules_count['exploits'],
-           scanners_count=self.modules_count['scanners'],
-           creds_count=self.modules_count['creds'],
+""".format(exploits_count=self.modules_count['exploits'] + self.modules_count['extra_exploits'],
+           scanners_count=self.modules_count['scanners'] + self.modules_count['extra_scanners'],
+           creds_count=self.modules_count['creds'] + self.modules_count['extra_creds'],
            plc_exploit_count=self.modules_count['plcs'],
            ics_switch_exploits_count=self.modules_count['ics_switchs'],
            ics_software_exploits_count=self.modules_count['ics_software']
@@ -225,11 +228,11 @@ ICS Exploits:
 
     def __parse_prompt(self):
         raw_prompt_default_template = "\001\033[4m\002{host}\001\033[0m\002 > "
-        raw_prompt_template = os.getenv("RSF_RAW_PROMPT", raw_prompt_default_template).replace('\\033', '\033')
+        raw_prompt_template = os.getenv("ISF_RAW_PROMPT", raw_prompt_default_template).replace('\\033', '\033')
         self.raw_prompt_template = raw_prompt_template if '{host}' in raw_prompt_template else raw_prompt_default_template
 
         module_prompt_default_template = "\001\033[4m\002{host}\001\033[0m\002 (\001\033[91m\002{module}\001\033[0m\002) > "
-        module_prompt_template = os.getenv("RSF_MODULE_PROMPT", module_prompt_default_template).replace('\\033', '\033')
+        module_prompt_template = os.getenv("ISF_MODULE_PROMPT", module_prompt_default_template).replace('\\033', '\033')
         self.module_prompt_template = module_prompt_template if all(map(lambda x: x in module_prompt_template, ['{host}', "{module}"])) else module_prompt_default_template
 
     @property
@@ -251,6 +254,20 @@ ICS Exploits:
                 return self.module_prompt_template.format(host=self.prompt_hostname, module="UnnamedModule")
         else:
             return self.raw_prompt_template.format(host=self.prompt_hostname)
+
+    def import_extra_package(self):
+        if self.extra_package_path:
+            extra_modules_dir = os.path.join(self.extra_package_path, "extra_modules")
+            if os.path.isdir(extra_modules_dir):
+                self.extra_modules_dir = extra_modules_dir
+                self.extra_modules_dirs = [module for module in os.listdir(self.extra_modules_dir) if
+                                           not module.startswith("__")]
+                self.extra_modules = utils.index_extra_modules(modules_directory=self.extra_modules_dir)
+                print("extra_modules_dir:%s" % self.extra_modules_dir)
+                sys.path.append(self.extra_package_path)
+                sys.path.append(self.extra_modules_dir)
+        else:
+            return
 
     def available_modules_completion(self, text):
         """ Looking for tab completion hints using setup.py entry_points.
@@ -288,9 +305,11 @@ ICS Exploits:
         self.current_module = None
 
     def command_use(self, module_path, *args, **kwargs):
-        module_path = utils.pythonize_path(module_path)
-        module_path = '.'.join(('icssploit', 'modules', module_path))
-        # module_path, _, exploit_name = module_path.rpartition('.')
+        if module_path.startswith("extra_"):
+            module_path = utils.pythonize_path(module_path)
+        else:
+            module_path = utils.pythonize_path(module_path)
+            module_path = '.'.join(('icssploit', 'modules', module_path))
         try:
             self.current_module = utils.import_exploit(module_path)()
         except icssploitException as err:
@@ -301,7 +320,10 @@ ICS Exploits:
         if text:
             return self.available_modules_completion(text)
         else:
-            return self.main_modules_dirs
+            if self.extra_modules_dirs:
+                return self.main_modules_dirs + self.extra_modules_dirs
+            else:
+                return self.main_modules_dirs
 
     @utils.module_required
     def command_run(self, *args, **kwargs):

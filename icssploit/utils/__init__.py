@@ -52,7 +52,18 @@ def index_modules(modules_directory=MODULES_DIR):
         root = root.replace(os.sep, '.')
         files = filter(lambda x: not x.startswith("__") and x.endswith('.py'), files)
         modules.extend(map(lambda x: '.'.join((root, os.path.splitext(x)[0])), files))
+    return modules
 
+
+def index_extra_modules(modules_directory=MODULES_DIR):
+    """ Return list of all exploits modules """
+
+    modules = []
+    for root, dirs, files in os.walk(modules_directory):
+        _, package, root = root.rpartition('extra_modules/'.replace('/', os.sep))
+        root = root.replace(os.sep, '.')
+        files = filter(lambda x: not x.startswith("__") and x.endswith('.py'), files)
+        modules.extend(map(lambda x: '.'.join((root, os.path.splitext(x)[0])), files))
     return modules
 
 

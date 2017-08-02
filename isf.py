@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import argparse
 import logging.handlers
+import os
 
 from icssploit.interpreter import IcssploitInterpreter
 from icssploit.utils import create_exploit
@@ -16,20 +17,20 @@ LOGGER.setLevel(logging.DEBUG)
 LOGGER.addHandler(log_handler)
 
 parser = argparse.ArgumentParser(description='ICSSploit - ICS Exploitation Framework')
-parser.add_argument('-a',
-                    '--add-exploit',
-                    metavar='exploit_path',
-                    help='Add exploit using default template.')
+parser.add_argument('-e',
+                    '--extra-package-path',
+                    metavar='extra_package_path',
+                    help='Add extra packet(clients, modules, protocols) to isf.')
 
 
-def icssploit():
-    isf = IcssploitInterpreter()
+def icssploit(extra_package_path=None):
+    isf = IcssploitInterpreter(extra_package_path)
     isf.start()
 
 if __name__ == "__main__":
     args = parser.parse_args()
-
-    if args.add_exploit:
-        create_exploit(args.add_exploit)
+    if args.extra_package_path:
+        if os.path.isdir(args.extra_package_path):
+            icssploit(extra_package_path=args.extra_package_path)
     else:
         icssploit()
