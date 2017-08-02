@@ -18,11 +18,11 @@ from functools import wraps
 
 import requests
 
-from .. import modules as rsf_modules
+from .. import modules as isf_modules
 from ..exceptions import icssploitException
 from ..printer import printer_queue, thread_output_stream
 
-MODULES_DIR = rsf_modules.__path__[0]
+MODULES_DIR = isf_modules.__path__[0]
 CREDS_DIR = os.path.join(MODULES_DIR, 'creds')
 EXPLOITS_DIR = os.path.join(MODULES_DIR, 'exploits')
 SCANNERS_DIR = os.path.join(MODULES_DIR, 'scanners')

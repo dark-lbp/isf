@@ -29,7 +29,7 @@ ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工
 * pysnmp
 * scapy
 
-## 在Kali2中安装
+## 在Kali 中安装
     git clone https://github.com/dark-lbp/isf/
     cd isf
     python isf.py

@@ -22,24 +22,24 @@ class icssploitInterpreterTest(icssploitTestCase):
         IcssploitInterpreter.setup = mock.Mock()
         self.interpreter = IcssploitInterpreter()
         self.interpreter.current_module = mock.MagicMock()
-        self.raw_prompt_default = "\001\033[4m\002rsf\001\033[0m\002 > "
-        self.module_prompt_default = lambda x: "\001\033[4m\002rsf\001\033[0m\002 (\001\033[91m\002{}\001\033[0m\002) > ".format(x)
+        self.raw_prompt_default = "\001\033[4m\002isf\001\033[0m\002 > "
+        self.module_prompt_default = lambda x: "\001\033[4m\002isf\001\033[0m\002 (\001\033[91m\002{}\001\033[0m\002) > ".format(x)
         GLOBAL_OPTS.clear()
 
     def prepare_prompt_env_variables(self, raw_prompt=None, module_prompt=None):
         if raw_prompt:
-            os.environ["RSF_RAW_PROMPT"] = raw_prompt
+            os.environ["ISF_RAW_PROMPT"] = raw_prompt
         else:
             try:
-                os.environ["RSF_RAW_PROMPT"]
+                os.environ["ISF_RAW_PROMPT"]
             except KeyError:
                 pass
 
         if module_prompt:
-            os.environ["RSF_MODULE_PROMPT"] = module_prompt
+            os.environ["ISF_MODULE_PROMPT"] = module_prompt
         else:
             try:
-                del os.environ["RSF_MODULE_PROMPT"]
+                del os.environ["ISF_MODULE_PROMPT"]
             except KeyError:
                 pass
 
@@ -209,7 +209,7 @@ class icssploitInterpreterTest(icssploitTestCase):
     def test_custom_raw_prompt(self):
         self.prepare_prompt_env_variables(raw_prompt="***{host}***")
         self.interpreter.current_module = None
-        self.assertEqual("***rsf***", self.interpreter.prompt)
+        self.assertEqual("***isf***", self.interpreter.prompt)
 
     def test_default_raw_prompt_no_env_variable(self):
         self.prepare_prompt_env_variables()
@@ -225,7 +225,7 @@ class icssploitInterpreterTest(icssploitTestCase):
         self.prepare_prompt_env_variables(module_prompt="*{host}*{module} >>>")
         module_name = "module_name"
         self.interpreter.current_module._MagicMock__info__ = {'name': module_name}
-        self.assertEqual("*rsf*{} >>>".format(module_name), self.interpreter.prompt)
+        self.assertEqual("*isf*{} >>>".format(module_name), self.interpreter.prompt)
 
     def test_default_module_prompt_no_env_variable(self):
         self.prepare_prompt_env_variables()
