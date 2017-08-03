@@ -7,7 +7,8 @@ ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工
 
 | Name               | Path                                   | Description            |
 | -------------------| ---------------------------------------|:----------------------:|  
-| modbus_tcp_client  | icssploit/clients/modbus_tcp_client.py | Modbus-TCP客户端工具    |
+| modbus_tcp_client  | icssploit/clients/modbus_tcp_client.py | Modbus-TCP客户端工具 |
+| wdb2_client        | icssploit/clients/wdb2_client.py       | WdbRPC Version 2 客户端工具(Vxworks 6.x)|
 
 
 
@@ -16,7 +17,8 @@ ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工
 | Name                    | Path                                                              | Description                             |
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
 | s7_300_400_plc_control  | icssploit/modules/exploits/plcs/siemens/s7_300_400_plc_control.py | S7-300/400 PLC 启停脚本                  |
-| vxworks_rpc_dos  | icssploit/modules/exploits/plcs/vxworks/vxworks_rpc_dos.py               | Vxworks RPC 远程拒绝服务（CVE-2015-7599） |
+| vxworks_rpc_dos         | icssploit/modules/exploits/plcs/vxworks/vxworks_rpc_dos.py               | Vxworks RPC 远程拒绝服务（CVE-2015-7599） |
+| quantum_140_plc_control | icssploit/modules/exploits/plcs/schneider/quantum_140_plc_control.py     | Schneider Quantum 140系列 PLC启停脚本    |
 
 
 # 安装
