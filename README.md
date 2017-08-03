@@ -20,6 +20,7 @@ ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工
 | vxworks_rpc_dos         | icssploit/modules/exploits/plcs/vxworks/vxworks_rpc_dos.py               | Vxworks RPC 远程拒绝服务（CVE-2015-7599） |
 | quantum_140_plc_control | icssploit/modules/exploits/plcs/schneider/quantum_140_plc_control.py     | Schneider Quantum 140系列 PLC启停脚本    |
 | crash_qnx_inetd_tcp_service | icssploit/modules/exploits/plcs/qnx/crash_qnx_inetd_tcp_service.py | Crash QNX Inetd TCP Service |
+| qconn_remote_exec | icssploit/modules/exploits/plcs/qnx/qconn_remote_exec.py | QNX QCONN 远程代码执行 |
 
 # 安装
 
