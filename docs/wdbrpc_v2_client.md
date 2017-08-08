@@ -22,7 +22,7 @@ Received 1 packets, got 1 answers, remaining 0 packets
 >>> data.encode('hex')
 '40c51800'
 ```
-    
+
 
 ## WriteMemory
 ```python
