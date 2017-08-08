@@ -65,27 +65,31 @@ Module options:
 # 额外目录的格式要求
  额外目录的格式要求如下所示，二三级目录的命名(例如:extra_modules、extra_exploits)必须按照以下规范，并且每个目录中都必须要有__init__.py文件
 
-    └── extra_isf_package
-        ├── extra_clients
-        │   ├── __init__.py
-        ├── extra_modules
-        │   ├── __init__.py
-        │   └── extra_exploits
-        │       ├── __init__.py
-        │       ├── ics_software
-        │       │   ├── __init__.py
-        │       ├── ics_switchs
-        │       │   ├── __init__.py
-        │       └── plcs
-        │           ├── __init__.py
-        │           ├── siemens
-        │           │   ├── __init__.py
-        │           │   ├── s7_300_400_plc_control.py
-        │           └── vxworks
-        │               ├── __init__.py
-        │               ├── vxworks_rpc_dos.py
-        └── extra_protocols
-            ├── __init__.py
+    extra_isf_package
+    ├── __init__.py
+    ├── extra_clients
+    │   ├── __init__.py
+    ├── extra_modules
+    │   ├── __init__.py
+    │   ├── extra_exploits
+    │   │   ├── __init__.py
+    │   │   ├── ics_software
+    │   │   │   ├── __init__.py
+    │   │   ├── ics_switchs
+    │   │   │   ├── __init__.py
+    │   │   │   ├── __init__.pyc
+    │   │   └── plcs
+    │   │       ├── __init__.py
+    │   │       ├── siemens
+    │   │       │   ├── __init__.py
+    │   │       │   └──s7_300_400_plc_control.py
+    │   │       └── vxworks
+    │   │           ├── __init__.py
+    │   │           └── vxworks_rpc_dos.py
+    │   └── extra_scanners
+    │       └── __init__.py
+    └── extra_protocols
+        └──  __init__.py
 
 # 如何在额外的modules中调用extra_clients或extra_protocols
 isf在读取额外目录时会将该目录加入到python path中，因此可以在额外脚本使用如下方式引用。

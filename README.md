@@ -11,16 +11,32 @@ ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工
 | wdb2_client        | icssploit/clients/wdb2_client.py       | WdbRPC Version 2 客户端工具(Vxworks 6.x)|
 
 
-
-
-## 漏洞利用脚本
+## Exploit Module
 | Name                    | Path                                                              | Description                             |
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
-| s7_300_400_plc_control  | icssploit/modules/exploits/plcs/siemens/s7_300_400_plc_control.py | S7-300/400 PLC 启停脚本                  |
-| vxworks_rpc_dos         | icssploit/modules/exploits/plcs/vxworks/vxworks_rpc_dos.py               | Vxworks RPC 远程拒绝服务（CVE-2015-7599） |
-| quantum_140_plc_control | icssploit/modules/exploits/plcs/schneider/quantum_140_plc_control.py     | Schneider Quantum 140系列 PLC启停脚本    |
-| crash_qnx_inetd_tcp_service | icssploit/modules/exploits/plcs/qnx/crash_qnx_inetd_tcp_service.py | Crash QNX Inetd TCP Service |
-| qconn_remote_exec | icssploit/modules/exploits/plcs/qnx/qconn_remote_exec.py | QNX QCONN 远程代码执行 |
+| s7_300_400_plc_control  | exploits/plcs/siemens/s7_300_400_plc_control.py | S7-300/400 PLC 启停脚本                  |
+| vxworks_rpc_dos         | exploits/plcs/vxworks/vxworks_rpc_dos.py               | Vxworks RPC 远程拒绝服务（CVE-2015-7599） |
+| quantum_140_plc_control | exploits/plcs/schneider/quantum_140_plc_control.py     | Schneider Quantum 140系列 PLC启停脚本    |
+| crash_qnx_inetd_tcp_service | exploits/plcs/qnx/crash_qnx_inetd_tcp_service.py | Crash QNX Inetd TCP Service |
+| qconn_remote_exec | exploits/plcs/qnx/qconn_remote_exec.py | QNX QCONN 远程代码执行 |
+
+
+## Scanner Module
+| Name                    | Path                                                              | Description                             |
+| ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
+| profinet-dcp-scan       | scanners/profinet-dcp-scan.py                                     | Profinet DCP 扫描器                      |
+
+
+## ICS Protocols Module (Scapy Module)
+These protocol can use for Fuzzing or create your own client.
+ 
+| Name                    | Path                                                              | Description                             |
+| ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
+| pn_dcp                  | icssploit/protocols/pn_dcp                                        | Profinet DCP Protocol                   |
+| modbus_tcp              | icssploit/protocols/modbus_tcp                                    | Modbus TCP Protocol                     |
+| wdbrpc2                 | icssploit/protocols/wdbrpc2                                       | WDB RPC Version 2 Protocol              |
+
+
 
 # 安装
 
