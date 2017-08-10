@@ -45,7 +45,7 @@
     
        Name                Current settings                                               Description
        ----                ----------------                                               -----------
-       version             1                                                              Snmp version 0:v1, 1:v2c
+       version             2                                                              Snmp version 1:v1, 2:v2c
        threads             8                                                              Number of threads
        stop_on_success     yes                                                            Stop on first valid community string
        verbosity           yes                                                            Display authentication attempts

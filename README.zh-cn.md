@@ -1,34 +1,33 @@
-# Industrial Exploitation Framework
-ISF(Industrial Exploitation Framework) is a exploitation framework like metasploit but writen by python. 
-ISF is based on open source project [routersploit](https://github.com/reverse-shell/routersploit).
-*Read this in other languages: [English](README.md), [简体中文](README.zh-cn.md),*
+# 框架介绍
+ISF(Industrial Exploitation Framework)，是一款基于python编写的类msf工控漏洞利用框架。该框架基于开源项目[routersploit](https://github.com/reverse-shell/routersploit)修改而来。
+*该文档的其他语言版本: [English](README.md), [简体中文](README.zh-cn.md),*
 
 
-## ICS Protocol Clients
+## 工控协议客户端
 | Name               | Path                                   | Description            |
 | -------------------| ---------------------------------------|:----------------------:|  
-| modbus_tcp_client  | icssploit/clients/modbus_tcp_client.py | Modbus-TCP Client      |
-| wdb2_client        | icssploit/clients/wdb2_client.py       | WdbRPC Version 2 Client(Vxworks 6.x)|
+| modbus_tcp_client  | icssploit/clients/modbus_tcp_client.py | Modbus-TCP客户端工具 |
+| wdb2_client        | icssploit/clients/wdb2_client.py       | WdbRPC Version 2 客户端工具(Vxworks 6.x)|
 
 
-## Exploit Module
-| Name                    | Path                                                              | Description                              |
-| ------------------------| ------------------------------------------------------------------|:----------------------------------------:|  
-| s7_300_400_plc_control  | exploits/plcs/siemens/s7_300_400_plc_control.py                   | S7-300/400 PLC start/stop                |
-| vxworks_rpc_dos         | exploits/plcs/vxworks/vxworks_rpc_dos.py                          | Vxworks RPC remote dos（CVE-2015-7599）  |
-| quantum_140_plc_control | exploits/plcs/schneider/quantum_140_plc_control.py                | Schneider Quantum 140 series PLC start/stop |
-| crash_qnx_inetd_tcp_service | exploits/plcs/qnx/crash_qnx_inetd_tcp_service.py              | QNX Inetd TCP service dos               |
-| qconn_remote_exec       | exploits/plcs/qnx/qconn_remote_exec.py                            | QNX qconn remote code execution         |
-
-
-## Scanner Module
+## Exploit 模块
 | Name                    | Path                                                              | Description                             |
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
-| profinet-dcp-scan       | scanners/profinet-dcp-scan.py                                     | Profinet DCP scanner                    |
+| s7_300_400_plc_control  | exploits/plcs/siemens/s7_300_400_plc_control.py | S7-300/400 PLC 启停脚本                  |
+| vxworks_rpc_dos         | exploits/plcs/vxworks/vxworks_rpc_dos.py               | Vxworks RPC 远程拒绝服务（CVE-2015-7599） |
+| quantum_140_plc_control | exploits/plcs/schneider/quantum_140_plc_control.py     | Schneider Quantum 140系列 PLC启停脚本    |
+| crash_qnx_inetd_tcp_service | exploits/plcs/qnx/crash_qnx_inetd_tcp_service.py | Crash QNX Inetd TCP Service |
+| qconn_remote_exec | exploits/plcs/qnx/qconn_remote_exec.py | QNX QCONN 远程代码执行 |
 
 
-## ICS Protocols Module (Scapy Module)
-These protocol can used in other Fuzzing framework like [Kitty](https://github.com/cisco-sas/kitty) or create your own client.
+## Scanner 模块
+| Name                    | Path                                                              | Description                             |
+| ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
+| profinet-dcp-scan       | scanners/profinet-dcp-scan.py                                     | Profinet DCP 扫描器                      |
+
+
+## ICS 协议模块 (使用Scapy编写)
+这些协议模块能够与其他Fuzz框架进行结合，例如[Kitty](https://github.com/cisco-sas/kitty)或用于编写属于你自己的客户端工具.
  
 | Name                    | Path                                                              | Description                             |
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
@@ -38,23 +37,23 @@ These protocol can used in other Fuzzing framework like [Kitty](https://github.c
 
 
 
-# Install
+# 安装
 
-## Python requirements
+## python依赖环境
 * gnureadline (OSX only)
 * requests
 * paramiko
 * beautifulsoup4
 * pysnmp
-* scapy [We suggest install scapy manual with this official document](http://scapy.readthedocs.io/en/latest/installation.html)
+* scapy [强烈建议参考官方文档手动安装最新版](http://scapy.readthedocs.io/en/latest/installation.html)
 
-## Install on Kali
+## 在Kali 中安装
     git clone https://github.com/dark-lbp/isf/
     cd isf
     python isf.py
 
 
-# Usage
+# 使用
         root@kali:~/Desktop/temp/isf# python isf.py
         
           _____ _____  _____ _____ _____  _      ____ _____ _______
@@ -88,11 +87,10 @@ These protocol can used in other Fuzzing framework like [Kitty](https://github.c
     isf > use exploits/plcs/siemens/s7_300_400_plc_control
     isf (S7-300/400 PLC Control) >
     
-You can use the tab key for completion.
-
+可以使用TAB键来补全路径。
 
 ## Options
-### Display module options:
+### 显示 options
     isf (S7-300/400 PLC Control) > show options
     
     Target options:
@@ -113,12 +111,12 @@ You can use the tab key for completion.
     
     isf (S7-300/400 PLC Control) >
     
-### Set options
+### 设置 options 参数
     isf (S7-300/400 PLC Control) > set target 192.168.70.210
     [+] {'target': '192.168.70.210'}
     
 
-## Run module
+## 执行module
     isf (S7-300/400 PLC Control) > run
     [*] Running module...
     [+] Target is alive
@@ -126,7 +124,7 @@ You can use the tab key for completion.
     [*] Stop plc
     isf (S7-300/400 PLC Control) >
     
-## Display information about exploit
+## 显示module信息
     isf (S7-300/400 PLC Control) > show info
     
     Name:
@@ -145,9 +143,9 @@ You can use the tab key for completion.
     
     isf (S7-300/400 PLC Control) >
     
-# Documents
-* [Modbus-TCP Client usage](docs/modbus_tcp_client.en-us.md)
-* [WDBRPCV2 Client usage](docs/wdbrpc_v2_client.en-us.md)
-* [SNMP_bruteforce usage](docs/snmp_bruteforce.en-us.md)
-* [Load modules from extra folder](docs/load_extra_modules_from_folder.en-us.md)
-* [How to write your own module](docs/how_to_create_module.en-us.md)
+# 说明文档
+* [Modbus-TCP客户端工具使用说明](docs/modbus_tcp_client.zh-cn.md)
+* [WDBRPCV2客户端工具使用说明](docs/wdbrpc_v2_client.zh-cn.md)
+* [SNMP爆破工具使用说明](docs/snmp_bruteforce.zh-cn.md)
+* [从额外的目录中读取modules](docs/load_extra_modules_from_folder.zh-cn.md)
+* [如何创建一个module](docs/how_to_create_module.zh-cn.md)

@@ -29,8 +29,8 @@ class Exploit(exploits.Exploit):
     }
 
     nic = exploits.Option('eth0', 'Interface Name e.g eth0, en0')
-    timeout = exploits.Option(5, 'timeout for response', validators=validators.integer)
-    verbose = exploits.Option(0, 'verbose, 0 or 1', validators=validators.integer)
+    timeout = exploits.Option(5, 'Timeout for response', validators=validators.integer)
+    verbose = exploits.Option(0, 'Scapy verbose level, 0 to 2', validators=validators.integer)
     sniff_mac_address = None
     sniff_finished = threading.Event()
     result = []
