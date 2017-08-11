@@ -165,6 +165,14 @@ class ValidatorsTest(icssploitTestCase):
         with self.assertRaises(OptionValidationError):
             validators.integer('foobar')
 
+    def test_mac_1(self):
+        valid_mac = 'FF:FF:FF:FF:FF:FF'
+        self.assertEqual(validators.mac(valid_mac), 'FF:FF:FF:FF:FF:FF')
+
+    def test_mac_2(self):
+        valid_mac = 'FF-FF-FF-FF-FF-FF'
+        self.assertEqual(validators.mac(valid_mac), 'FF:FF:FF:FF:FF:FF')
+
 
 if __name__ == '__main__':
     unittest.main()

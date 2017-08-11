@@ -54,8 +54,8 @@ def ipv4(address):
 
 
 def mac(address):
-    if re.match("[0-9a-f]{2}([:])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", address.lower()):
-        return address
+    if re.match("[0-9a-f]{2}([:-])[0-9a-f]{2}(\\1[0-9a-f]{2}){4}$", address.lower()):
+        return address.replace('-', ':')
     else:
         raise OptionValidationError("Option have to be valid Mac address.")
 
