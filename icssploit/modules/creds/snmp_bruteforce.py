@@ -36,8 +36,8 @@ class Exploit(exploits.Exploit):
     }
 
     target = exploits.Option('', 'Target IP address or file with target:port (file://)')
-    port = exploits.Option(161, 'Target port')
-    version = exploits.Option(1, 'Snmp version 0:v1, 1:v2c', validators=validators.integer)
+    port = exploits.Option(161, 'Target port', validators=validators.integer)
+    version = exploits.Option(2, 'Snmp version 1:v1, 2:v2c', validators=validators.integer)
     threads = exploits.Option(8, 'Number of threads')
     snmp = exploits.Option(wordlists.snmp, 'Community string or file with community strings (file://)')
     verbosity = exploits.Option('yes', 'Display authentication attempts')
@@ -78,8 +78,8 @@ class Exploit(exploits.Exploit):
                 string = data.next().strip()
 
                 errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
-                    cmdgen.CommunityData(string, mpModel=self.version),
-                    cmdgen.UdpTransportTarget((self.target, int(self.port))),
+                    cmdgen.CommunityData(string, mpModel=self.version - 1),
+                    cmdgen.UdpTransportTarget((self.target, self.port)),
                     '1.3.6.1.2.1.1.1.0',
                 )
 

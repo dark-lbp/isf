@@ -54,8 +54,8 @@
     isf (SNMP Bruteforce) > set target 192.168.70.210
     [+] {'target': '192.168.70.210'}
     # 部分PLC设备只支持snmp v1版本
-    isf (SNMP Bruteforce) > set version 0
-    [+] {'version': '0'}
+    isf (SNMP Bruteforce) > set version 1
+    [+] {'version': '1'}
 
 # 执行暴力破解
     isf (SNMP Bruteforce) > run

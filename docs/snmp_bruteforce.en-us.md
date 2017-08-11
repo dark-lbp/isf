@@ -55,7 +55,7 @@
     [+] {'target': '192.168.70.210'}
     # Some PLC only support snmp version 1
     isf (SNMP Bruteforce) > set version 1
-    [+] {'version': '0'}
+    [+] {'version': '1'}
 
 # run module
     isf (SNMP Bruteforce) > run
