@@ -26,7 +26,9 @@ ISF is based on open source project [routersploit](https://github.com/reverse-sh
 ## Scanner Module
 | Name                    | Path                                                              | Description                             |
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
-| profinet-dcp-scan       | scanners/profinet-dcp-scan.py                                     | Profinet DCP scanner                    |
+| profinet_dcp_scan       | scanners/profinet_dcp_scan.py                                     | Profinet DCP scanner                    |
+| vxworks_6_scan          | scanners/vxworks_6_scan.py                                        | Vxworks 6.x scanner                     |
+
 
 
 ## ICS Protocols Module (Scapy Module)
@@ -48,6 +50,7 @@ These protocol can used in other Fuzzing framework like [Kitty](https://github.c
 * paramiko
 * beautifulsoup4
 * pysnmp
+* python-nmap
 * scapy [We suggest install scapy manual with this official document](http://scapy.readthedocs.io/en/latest/installation.html)
 
 ## Install on Kali

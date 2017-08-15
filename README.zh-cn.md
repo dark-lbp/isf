@@ -27,6 +27,7 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 | Name                    | Path                                                              | Description                             |
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
 | profinet-dcp-scan       | scanners/profinet-dcp-scan.py                                     | Profinet DCP 扫描器                      |
+| vxworks_6_scan          | scanners/vxworks_6_scan.py                                        | Vxworks 6.x 扫描器                       |
 
 
 ## ICS 协议模块 (使用Scapy编写)
@@ -48,6 +49,7 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 * paramiko
 * beautifulsoup4
 * pysnmp
+* python-nmap
 * scapy [强烈建议参考官方文档手动安装最新版](http://scapy.readthedocs.io/en/latest/installation.html)
 
 ## 在Kali 中安装
