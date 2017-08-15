@@ -152,5 +152,6 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 * [Modbus-TCP客户端工具使用说明](docs/modbus_tcp_client.zh-cn.md)
 * [WDBRPCV2客户端工具使用说明](docs/wdbrpc_v2_client.zh-cn.md)
 * [SNMP爆破工具使用说明](docs/snmp_bruteforce.zh-cn.md)
+* [Vxworks 6.x 扫描器使用说明](docs/vxworks_6_scan.zh-cn.md)
 * [从额外的目录中读取modules](docs/load_extra_modules_from_folder.zh-cn.md)
 * [如何创建一个module](docs/how_to_create_module.zh-cn.md)

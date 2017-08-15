@@ -154,5 +154,6 @@ You can use the tab key for completion.
 * [Modbus-TCP Client usage](docs/modbus_tcp_client.en-us.md)
 * [WDBRPCV2 Client usage](docs/wdbrpc_v2_client.en-us.md)
 * [SNMP_bruteforce usage](docs/snmp_bruteforce.en-us.md)
+* [Vxworks 6.x Scanner useage](docs/vxworks_6_scan.en-us.md)
 * [Load modules from extra folder](docs/load_extra_modules_from_folder.en-us.md)
 * [How to write your own module](docs/how_to_create_module.en-us.md)
