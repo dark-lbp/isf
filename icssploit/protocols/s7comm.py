@@ -290,7 +290,6 @@ class COTPCC(Packet):
 
 
 class COTPDT(Packet):
-    name = "COTP_DT"
     fields_desc = [
         XByteField("COTPLength", 0x02),
         ByteEnumField("PDUType", 0xf0, COTP_PDU_TYPE),
@@ -486,7 +485,6 @@ def is_s7_response_packet(pkt):
 
 
 class S7Header(Packet):
-    name = "S7_Header"
     fields_desc = [
         XByteField("ProtocolId", 0x32),
         ByteEnumField("ROSCTR", 0x01, S7_PDU_TYPE),
@@ -509,7 +507,6 @@ class S7Header(Packet):
 
 ###########SetCon#####################
 class S7SetConParameter(Packet):
-    name = "S7_SetCon_Parameter"
     fields_desc = [
         ByteEnumField("Function", 0xf0, S7_JB_FUNCTION),
         XByteField("Reserved", 0x00),
@@ -582,14 +579,12 @@ class S7ReadSZLParameterRsp(Packet):
 
 
 class S7ReadSZLDataTreeRsp(Packet):
-    name = "S7_ReadSZL_Data_Tree"
     fields_desc = [StrField("Data", "\x00", fmt="H")]
 
 bind_layers(S7ReadSZLDataTreeRsp, Padding)
 
 
 class S7ReadSZLDataRsp(Packet):
-    name = "S7_ReadSZL_Data_Response"
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
         ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
@@ -794,7 +789,6 @@ class S7ReadVarItemsReq(Packet):
 
 
 class S7ReadVarParameterReq(Packet):
-    name = "S7_ReadVar_Parameter_Req"
     fields_desc = [
         ByteEnumField("Function", 0x04, S7_JB_FUNCTION),
         FieldLenField("ItemCount", None, fmt="B", count_of="Items"),
@@ -983,7 +977,6 @@ class S7DeleteBlockParameterReq(Packet):
 
 
 class S7DeleteBlockReq(Packet):
-    name = "S7_DeleteBlock_Req"
     fields_desc = [
         XByteField("ProtocolId", 0x32),
         ByteEnumField("ROSCTR", 0x01, S7_PDU_TYPE),
