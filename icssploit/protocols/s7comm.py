@@ -591,7 +591,7 @@ class S7ReadSZLDataRsp(Packet):
         XShortField("Length", None),
         XShortField("SZLId", 0x001c),
         XShortField("SZLIndex", 0x0000),
-        FieldLenField("SZLLength", None, length_of="SZLDataTree", fmt="H", adjust=lambda pkt, x: x / x.SZLDataTree),
+        FieldLenField("SZLLength", None, length_of="SZLDataTree", fmt="H", adjust=lambda pkt, x: x / x.SZLListCount),
         FieldLenField("SZLListCount", None, count_of="SZLDataTree", fmt="H", adjust=lambda pkt, x: x),
         PacketListField("SZLDataTree", [], S7ReadSZLDataTreeRsp, length_from=lambda x: x.SZLLength * x.SZLListCount)
     ]

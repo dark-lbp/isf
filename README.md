@@ -11,6 +11,7 @@ ISF is based on open source project [routersploit](https://github.com/reverse-sh
 | -------------------| ---------------------------------------|:----------------------:|  
 | modbus_tcp_client  | icssploit/clients/modbus_tcp_client.py | Modbus-TCP Client      |
 | wdb2_client        | icssploit/clients/wdb2_client.py       | WdbRPC Version 2 Client(Vxworks 6.x)|
+| s7_client          | icssploit/clients/s7_client.py         | s7comm Client(S7 300/400 PLC)       |
 
 
 ## Exploit Module
@@ -39,6 +40,7 @@ These protocol can used in other Fuzzing framework like [Kitty](https://github.c
 | pn_dcp                  | icssploit/protocols/pn_dcp                                        | Profinet DCP Protocol                   |
 | modbus_tcp              | icssploit/protocols/modbus_tcp                                    | Modbus TCP Protocol                     |
 | wdbrpc2                 | icssploit/protocols/wdbrpc2                                       | WDB RPC Version 2 Protocol              |
+| s7comm                  | icssploit/protocols/s7comm.py                                     | S7comm Protocol                         |
 
 
 
@@ -153,6 +155,7 @@ You can use the tab key for completion.
 # Documents
 * [Modbus-TCP Client usage](docs/modbus_tcp_client.en-us.md)
 * [WDBRPCV2 Client usage](docs/wdbrpc_v2_client.en-us.md)
+* [S7comm Client usage](docs/s7_client.en-us.md)
 * [SNMP_bruteforce usage](docs/snmp_bruteforce.en-us.md)
 * [Vxworks 6.x Scanner useage](docs/vxworks_6_scan.en-us.md)
 * [Load modules from extra folder](docs/load_extra_modules_from_folder.en-us.md)

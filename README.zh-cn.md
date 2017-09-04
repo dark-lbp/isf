@@ -11,6 +11,7 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 | -------------------| ---------------------------------------|:----------------------:|  
 | modbus_tcp_client  | icssploit/clients/modbus_tcp_client.py | Modbus-TCP客户端工具 |
 | wdb2_client        | icssploit/clients/wdb2_client.py       | WdbRPC Version 2 客户端工具(Vxworks 6.x)|
+| s7_client          | icssploit/clients/s7_client.py         | s7comm 客户端工具(S7 300/400 PLC)       |
 
 
 ## Exploit 模块
@@ -35,10 +36,10 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
  
 | Name                    | Path                                                              | Description                             |
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
-| pn_dcp                  | icssploit/protocols/pn_dcp                                        | Profinet DCP Protocol                   |
-| modbus_tcp              | icssploit/protocols/modbus_tcp                                    | Modbus TCP Protocol                     |
-| wdbrpc2                 | icssploit/protocols/wdbrpc2                                       | WDB RPC Version 2 Protocol              |
-
+| pn_dcp                  | icssploit/protocols/pn_dcp                                        | Profinet DCP 协议                   |
+| modbus_tcp              | icssploit/protocols/modbus_tcp                                    | Modbus TCP 协议                     |
+| wdbrpc2                 | icssploit/protocols/wdbrpc2                                       | WDB RPC Version 2 协议              |
+| s7comm                  | icssploit/protocols/s7comm.py                                     | S7comm 协议                         |
 
 
 # 安装
@@ -151,6 +152,7 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 # 说明文档
 * [Modbus-TCP客户端工具使用说明](docs/modbus_tcp_client.zh-cn.md)
 * [WDBRPCV2客户端工具使用说明](docs/wdbrpc_v2_client.zh-cn.md)
+* [S7客户端工具使用说明](docs/s7_client.zh-cn.md)
 * [SNMP爆破工具使用说明](docs/snmp_bruteforce.zh-cn.md)
 * [Vxworks 6.x 扫描器使用说明](docs/vxworks_6_scan.zh-cn.md)
 * [从额外的目录中读取modules](docs/load_extra_modules_from_folder.zh-cn.md)

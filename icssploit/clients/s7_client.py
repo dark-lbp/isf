@@ -66,6 +66,54 @@ class S7Client(Base):
         self.protect_level = int(str(rsp)[48].encode('hex'))
         self.logger.info("CPU protect level is %s" % self.protect_level)
 
+    def get_target_info(self):
+        order_code = ''
+        version = ''
+        module_type_name = ''
+        as_name = ''
+        module_name = ''
+        serial_number = ''
+        packet1 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="UserData", Parameters=S7ReadSZLParameterReq(),
+                                                    Data=S7ReadSZLDataReq(SZLId=0x0011, SZLIndex=0x0000))
+        rsp1 = self.send_receive_s7_packet(packet1)
+        try:
+            order_code_data = rsp1[S7ReadSZLDataTreeRsp].Data[:rsp1[S7ReadSZLDataRsp].SZLLength]
+            order_code = order_code_data[2:-7]
+            version_data = rsp1[S7ReadSZLDataTreeRsp].Data[-3:]
+            version = 'V {:x}.{:x}.{:x}'.format(
+                int(version_data[0].encode('hex'), 16),
+                int(version_data[1].encode('hex'), 16),
+                int(version_data[2].encode('hex'), 16),
+            )
+
+        except Exception as err:
+            self.logger.error("Can't get order code and version from target")
+
+        packet2 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="UserData", Parameters=S7ReadSZLParameterReq(),
+                                                    Data=S7ReadSZLDataReq(SZLId=0x001c, SZLIndex=0x0000))
+        rsp2 = self.send_receive_s7_packet(packet2)
+        try:
+            module_name_data = rsp2[S7ReadSZLDataTreeRsp].Data[
+                               rsp2[S7ReadSZLDataRsp].SZLLength + 2:rsp2[S7ReadSZLDataRsp].SZLLength * 2]
+            module_name = str(module_name_data[:module_name_data.index('\x00')])
+            self.logger.debug("module_name:%s " % module_name)
+            as_name_data = rsp2[S7ReadSZLDataTreeRsp].Data[2:rsp2[S7ReadSZLDataRsp].SZLLength]
+            as_name = str(as_name_data[:as_name_data.index('\x00')])
+            self.logger.debug("as_name:%s " % as_name)
+            serial_number_data = rsp2[S7ReadSZLDataTreeRsp].Data[
+                               rsp2[S7ReadSZLDataRsp].SZLLength * 4 + 2:rsp2[S7ReadSZLDataRsp].SZLLength * 5]
+            serial_number = str(serial_number_data[:serial_number_data.index('\x00')])
+            self.logger.debug("serial_number:%s " % serial_number)
+            module_type_name_data = rsp2[S7ReadSZLDataTreeRsp].Data[
+                               rsp2[S7ReadSZLDataRsp].SZLLength * 5 + 2:rsp2[S7ReadSZLDataRsp].SZLLength * 6]
+            module_type_name = str(module_type_name_data[:module_type_name_data.index('\x00')])
+            self.logger.debug("module_type_name:%s " % module_type_name)
+
+        except Exception as err:
+            self.logger.error("Can't get module info from target")
+
+        return order_code, version, module_type_name, as_name, module_name, serial_number
+
     def check_privilege(self):
         self._get_cpu_protect_level()
         if self.protect_level == 1:
@@ -279,13 +327,13 @@ class S7Client(Base):
 
         file_block_num = "{0:05d}".format(block_num)
         file_name = '_' + file_block_type + file_block_num + dist
-        self.logger.info("Start upload %s%s from targets" % (block_type, block_num))
+        self.logger.info("Start upload %s%s from target" % (block_type, block_num))
         packet1 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="Job",
                                                     Parameters=S7RequestUploadBlockParameterReq(Filename=file_name))
         rsp1 = self.send_receive_s7_packet(packet1)
         # Todo: Might got some error
         if rsp1.ErrorClass != 0x0:
-            self.logger.error("Can't upload %s%s from targets" % (block_type, block_num))
+            self.logger.error("Can't upload %s%s from target" % (block_type, block_num))
             self.logger.error("Error Class: %s, Error Code %s" % (rsp1.ErrorClass, rsp1.ErrorCode))
             return None
         packet2 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="Job",
@@ -303,6 +351,7 @@ class S7Client(Base):
                 break
         packet3 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="Job", Parameters=S7UploadBlockEndParameterReq())
         self.send_receive_s7_packet(packet3)
+        self.logger.info("Upload %s%s from target succeed" % (block_type, block_num))
         return block_data
 
     def get_info_from_block(self, block_data):
@@ -389,7 +438,7 @@ class S7Client(Base):
         packet3 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="AckData", Parameters=S7DownloadEndParameterRsp())
         self.send_s7_packet(packet3)
         # Insert block
-        print("File_name:%s" % ('\x00' + file_name[1:]))
+        self.logger.debug("File_name:%s" % ('\x00' + file_name[1:]))
         packet4 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="Job",
                                                     Parameters=S7PIServiceParameterReq(
                                                         ParameterBlock=S7PIServiceParameterBlock(
@@ -403,6 +452,7 @@ class S7Client(Base):
             self.logger.error("Can't insert %s%s to targets" % (block_type, block_num))
             self.logger.error("Error Class: %s, Error Code %s" % (rsp1.ErrorClass, rsp1.ErrorCode))
             return None
+        self.logger.info("Download %s%s to target succeed" % (block_type, block_num))
 
     def download_block_to_target_only(self, block_data, dist='P', transfer_size=462, stop_target=False):
         """ Download block to target only (didn't active block).
@@ -471,6 +521,7 @@ class S7Client(Base):
         self._pdur = download_end_req.PDUR
         packet3 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="AckData", Parameters=S7DownloadEndParameterRsp())
         self.send_s7_packet(packet3)
+        self.logger.info("Download %s%s to target succeed" % (block_type, block_num))
 
     def get_target_status(self):
         packet1 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="UserData", Parameters=S7ReadSZLParameterReq(),
