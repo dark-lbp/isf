@@ -158,5 +158,7 @@ You can use the tab key for completion.
 * [S7comm Client usage](docs/s7_client.en-us.md)
 * [SNMP_bruteforce usage](docs/snmp_bruteforce.en-us.md)
 * [Vxworks 6.x Scanner useage](docs/vxworks_6_scan.en-us.md)
+* [Profient DCP Scanner useage](docs/profinet_dcp_scan.en-us.md)
+* [S7comm PLC Scanner useage](docs/s7comm_scan.en-us.md)
 * [Load modules from extra folder](docs/load_extra_modules_from_folder.en-us.md)
 * [How to write your own module](docs/how_to_create_module.en-us.md)
