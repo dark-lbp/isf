@@ -36,7 +36,7 @@ class S7Client(Base):
         self.authorized = False
         self._password = None
         self._mmc_password = None
-        self._is_running = False
+        self.is_running = False
 
     def connect(self):
         sock = socket.socket()
@@ -532,17 +532,17 @@ class S7Client(Base):
         status = str(rsp)[44]
         if status == '\x08':
             self.logger.info("Target is in run mode")
-            self._is_running = True
+            self.is_running = True
         elif status == '\x04':
             self.logger.info("Target is in stop mode")
-            self._is_running = False
+            self.is_running = False
         else:
             self.logger.info("Target is in unknown mode")
-            self._is_running = False
+            self.is_running = False
 
     def stop_target(self):
         self.get_target_status()
-        if not self._is_running:
+        if not self.is_running:
             self.logger.info("Target is already stop")
             return
         self.logger.info("Trying to stop targets")
@@ -561,7 +561,7 @@ class S7Client(Base):
         :param cold: Doing cold restart, True or False.
         '''
         self.get_target_status()
-        if self._is_running:
+        if self.is_running:
             self.logger.info("Target is already running")
             return
         self.logger.info("Trying to start targets")

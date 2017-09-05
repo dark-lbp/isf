@@ -81,6 +81,10 @@ class Exploit(exploits.Exploit):
                 string = data.next().strip()
                 if len(string) > 8:
                     continue
+                s7_client.check_privilege()
+                if s7_client.protect_level == 1:
+                    print_error("Target didn't set password.")
+                    return
                 s7_client.auth(string)
                 if s7_client.authorized:
                     if boolify(self.stop_on_success):
