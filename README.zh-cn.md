@@ -154,6 +154,7 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 * [WDBRPCV2客户端工具使用说明](docs/wdbrpc_v2_client.zh-cn.md)
 * [S7客户端工具使用说明](docs/s7_client.zh-cn.md)
 * [SNMP爆破工具使用说明](docs/snmp_bruteforce.zh-cn.md)
+* [S7 300/400 PLC 密码爆破工具使用说明](docs/s7_bruteforce.zh-cn.md)
 * [Vxworks 6.x 扫描器使用说明](docs/vxworks_6_scan.zh-cn.md)
 * [Profient DCP 扫描使用说明](docs/profinet_dcp_scan.zh-cn.md)
 * [S7comm PLC 扫描器使用说明](docs/s7comm_scan.zh-cn.md)
