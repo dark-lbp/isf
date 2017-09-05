@@ -88,6 +88,7 @@ class S7Client(Base):
 
         except Exception as err:
             self.logger.error("Can't get order code and version from target")
+            return order_code, version, module_type_name, as_name, module_name, serial_number
 
         packet2 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="UserData", Parameters=S7ReadSZLParameterReq(),
                                                     Data=S7ReadSZLDataReq(SZLId=0x001c, SZLIndex=0x0000))
@@ -111,6 +112,7 @@ class S7Client(Base):
 
         except Exception as err:
             self.logger.error("Can't get module info from target")
+            return order_code, version, module_type_name, as_name, module_name, serial_number
 
         return order_code, version, module_type_name, as_name, module_name, serial_number
 
