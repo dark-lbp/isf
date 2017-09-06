@@ -232,6 +232,18 @@ S7_FILE_IDENTIFIER = {
     "$": "Module header for up-loading"
 }
 
+S7_SUBSCRIBED_EVENTS = [
+    "Mode-transition",
+    "System-diagnostics",
+    "Userdefined",
+    "Unknown1",
+    "Unknown2",
+    "Unknown3",
+    "Unknown4",
+    "Alarms"
+]
+
+
 
 class TPKT(Packet):
     fields_desc = [
@@ -397,8 +409,13 @@ def guess_s7_parameters_class(pkt, payload):
         # ROSCTR: User Data(0x07)
         elif pkt.ROSCTR == 0x07:
             if payload[0:3] == "\x00\x01\x12":
+                # Subfunction: Forces (0x10)
+                if payload[5:7] == "\x41\x10":
+                    return S7ForceParameterReq(payload)
+                elif payload[5:7] == "\x81\x10":
+                    return S7ForceParameterRsp(payload)
                 # Subfunction: List blocks (0x01)
-                if payload[5:7] == "\x43\x01":
+                elif payload[5:7] == "\x43\x01":
                     return S7ListBlockParameterReq(payload)
                 elif payload[5:7] == "\x83\x01":
                     return S7ListBlockParameterRsp(payload)
@@ -417,6 +434,11 @@ def guess_s7_parameters_class(pkt, payload):
                     return S7ReadSZLParameterReq(payload)
                 elif payload[5:7] == "\x84\x01":
                     return S7ReadSZLParameterRsp(payload)
+                # Subfunction: Message service (0x02)
+                elif payload[5:7] == "\x44\x02":
+                    return S7MessageServiceParameterReq(payload)
+                elif payload[5:7] == "\x84\x02":
+                    return S7MessageServiceParameterRsp(payload)
                 # Subfunction: PLC password (0x01)
                 elif payload[5:7] == "\x45\x01":
                     return S7PasswordParameterReq(payload)
@@ -438,6 +460,10 @@ def guess_s7_data_class(pkt, payload):
             return S7ReadSZLDataReq(payload)
         elif pkt.haslayer(S7ReadSZLParameterRsp):
             return S7ReadSZLDataRsp(payload)
+        elif pkt.haslayer(S7MessageServiceParameterReq):
+            return S7MessageServiceDataReq(payload)
+        elif pkt.haslayer(S7MessageServiceParameterRsp):
+            return S7MessageServiceDataRsp(payload)
         elif pkt.haslayer(S7UploadBlockParameterRsp):
             return S7UploadBlockDataRsp(payload)
         elif pkt.haslayer(S7DownloadParameterRsp):
@@ -468,6 +494,10 @@ def guess_s7_data_class(pkt, payload):
             return S7GetBlockInfoDataReq(payload)
         elif pkt.haslayer(S7GetBlockInfoParameterRsp):
             return S7GetBlockInfoDataRsp(payload)
+        elif pkt.haslayer(S7ForceParameterReq):
+            return S7ForceDataReq(payload)
+        elif pkt.haslayer(S7ForceParameterRsp):
+            return S7ForceDataRsp(payload)
         return payload
 
 
@@ -505,7 +535,6 @@ class S7Header(Packet):
     ]
 
 
-###########SetCon#####################
 class S7SetConParameter(Packet):
     fields_desc = [
         ByteEnumField("Function", 0xf0, S7_JB_FUNCTION),
@@ -601,6 +630,116 @@ class S7ReadSZLDataRsp(Packet):
             l = len(p) - 4
             p = p[:2] + struct.pack("!H", l) + p[4:]
         return p + pay
+
+
+class S7MessageServiceParameterReq(Packet):
+    fields_desc = [
+        X3BytesField("ParameterHead", 0x000112),
+        XByteField("ParameterLength", None),
+        XByteField("Code", 0x11),
+        BitField("Type", 4, 4),
+        BitEnumField("FunctionGroup", 4, 4, S7_UD_FUNCTION_GROUP),
+        MultiEnumField("SubFunction", 0x02, S7_SUB_FUNCTIONS, fmt='B', depends_on=lambda p: p.FunctionGroup),
+        XByteField("seq", 0x00)
+    ]
+
+    def post_build(self, p, pay):
+        if self.ParameterLength is None:
+            l = len(p) - 4
+            p = p[:3] + struct.pack("!B", l) + p[4:]
+        return p + pay
+
+
+class S7MessageServiceDataReq(Packet):
+    fields_desc = [
+        ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        FieldLenField("Length", None, fmt="H", length_of="UserName", adjust=lambda pkt, x: x + 2),
+        FlagsField("SubscribedEvents", 0, 8, S7_SUBSCRIBED_EVENTS),
+        ByteField("Unknown1", 0x0),
+        StrLenField("UserName", "USER1", length_from=lambda pkt: pkt.Length - 2)
+    ]
+
+
+class S7MessageServiceParameterRsp(Packet):
+    fields_desc = [
+        X3BytesField("ParameterHead", 0x000112),
+        XByteField("ParameterLength", None),
+        XByteField("Code", 0x11),
+        BitField("Type", 8, 4),
+        BitEnumField("FunctionGroup", 4, 4, S7_UD_FUNCTION_GROUP),
+        MultiEnumField("SubFunction", 0x02, S7_SUB_FUNCTIONS, fmt='B', depends_on=lambda p: p.FunctionGroup),
+        XByteField("seq", 0x00),
+        XByteField("DURN", 0x00),
+        XByteField("LastUnit", 0x00),
+        XShortEnumField("ErrorCode", 0x0000, S7_ERROR_CLASS)
+    ]
+
+    def post_build(self, p, pay):
+        if self.ParameterLength is None:
+            l = len(p) - 4
+            p = p[:3] + struct.pack("!B", l) + p[4:]
+        return p + pay
+
+
+class S7MessageServiceDataRsp(Packet):
+    fields_desc = [
+        ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        XShortField("Length", 2),
+        XByteField("Result", 0x2),
+        XByteField("Reserved", 0x0)
+    ]
+
+
+class S7ForceDataReq(Packet):
+    fields_desc = [
+        ByteEnumField("ReturnCode", 0x0a, S7_RETURN_CODE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        FieldLenField("DataLength", None, fmt="H", length_of="Data", adjust=lambda pkt, x: x),
+        StrLenField("Data", "00140004000000000001000000010001000100010001000000000000".decode('hex'),
+                    length_from=lambda x: x.DataLength)
+    ]
+
+
+class S7ForceParameterReq(Packet):
+    fields_desc = [
+        StrFixedLenField("ParameterHead", "\x00\x01\x12", length=3),
+        XByteField("ParameterLength", 0x04),
+        XByteField("Unknown", 0x12),
+        BitEnumField("Type", 4, 4, S7_UD_PARAMETER_TYPE),
+        BitEnumField("FunctionGroup", 1, 4, S7_UD_FUNCTION_GROUP),
+        MultiEnumField("SubFunction", 0x10, S7_SUB_FUNCTIONS, fmt='B', depends_on=lambda p: p.FunctionGroup),
+        XByteField("Sequence", 0x00),
+        XByteField("DURN", 0x00),
+        XByteField("LastUnit", 0x00),
+        XShortEnumField("ErrorCode", 0x0000, S7_ERROR_CLASS)
+    ]
+
+
+class S7ForceDataRsp(Packet):
+    fields_desc = [
+        ByteEnumField("ReturnCode", 0x0a, S7_RETURN_CODE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        FieldLenField("DataLength", None, fmt="H", length_of="Data", adjust=lambda pkt, x: x),
+        StrLenField("Data", "\x00", length_from=lambda x: x.DataLength),
+
+    ]
+
+
+class S7ForceParameterRsp(Packet):
+    fields_desc = [
+        StrFixedLenField("ParameterHead", "\x00\x01\x12", length=3),
+        XByteField("ParameterLength", 0x08),
+        XByteField("Unknown", 0x12),
+        BitEnumField("Type", 4, 4, S7_UD_PARAMETER_TYPE),
+        BitEnumField("FunctionGroup", 1, 4, S7_UD_FUNCTION_GROUP),
+        MultiEnumField("SubFunction", 0x10, S7_SUB_FUNCTIONS, fmt='B', depends_on=lambda p: p.FunctionGroup),
+        XByteField("Sequence", 0x00),
+        XByteField("DURN", 0x00),
+        XByteField("LastUnit", 0x00),
+        XShortEnumField("ErrorCode", 0x0000, S7_ERROR_CLASS)
+    ]
 
 
 class S7ListBlockDataReq(Packet):

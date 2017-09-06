@@ -634,3 +634,54 @@ class S7commTests(icssploitTestCase):
         self.assertEqual(packet.haslayer(TPKT), True)
         self.assertEqual(packet.haslayer(COTPDT), True)
         self.assertEqual(packet.haslayer(S7Header), True)
+
+    def test_message_service_req(self):
+        data = '0300002702f080320700000500000800' \
+               '0e0001120411440200ff09000a010055' \
+               '53455231000000'.decode('hex')
+        packet = TPKT(data)
+        packet.show()
+        self.assertEqual(packet.haslayer(TPKT), True)
+        self.assertEqual(packet.haslayer(COTPDT), True)
+        self.assertEqual(packet.haslayer(S7Header), True)
+        self.assertEqual(packet.haslayer(S7MessageServiceParameterReq), True)
+        self.assertEqual(packet.haslayer(S7MessageServiceDataReq), True)
+        self.assertEqual(packet[S7MessageServiceDataReq].SubscribedEvents, 1)
+
+    def test_message_service_rsp(self):
+        data = '0300002302f080320700000500000c00' \
+               '0600011208128402ff00000000ff0900' \
+               '020200'.decode('hex')
+        packet = TPKT(data)
+        packet.show()
+        self.assertEqual(packet.haslayer(TPKT), True)
+        self.assertEqual(packet.haslayer(COTPDT), True)
+        self.assertEqual(packet.haslayer(S7Header), True)
+        self.assertEqual(packet.haslayer(S7MessageServiceParameterRsp), True)
+        self.assertEqual(packet.haslayer(S7MessageServiceDataRsp), True)
+
+    def test_force_req(self):
+        data = '0300003d02f08032070000b400000c00' \
+               '20000112081241100000000000ff0900' \
+               '1c001400040000000000010000000100' \
+               '01000100010001000000000000'.decode('hex')
+        packet = TPKT(data)
+        packet.show()
+        self.assertEqual(packet.haslayer(TPKT), True)
+        self.assertEqual(packet.haslayer(COTPDT), True)
+        self.assertEqual(packet.haslayer(S7Header), True)
+        self.assertEqual(packet.haslayer(S7ForceParameterReq), True)
+        self.assertEqual(packet.haslayer(S7ForceDataReq), True)
+
+    def test_force_rsp(self):
+        data = '0300002902f080320700006101000c00' \
+               '0c000112081281101500000000ff0900' \
+               '080004000001000001'.decode('hex')
+        packet = TPKT(data)
+        packet.show()
+        self.assertEqual(packet.haslayer(TPKT), True)
+        self.assertEqual(packet.haslayer(COTPDT), True)
+        self.assertEqual(packet.haslayer(S7Header), True)
+        self.assertEqual(packet.haslayer(S7ForceParameterRsp), True)
+        self.assertEqual(packet.haslayer(S7ForceDataRsp), True)
+
