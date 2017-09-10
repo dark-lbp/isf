@@ -21,7 +21,7 @@ class Exploit(exploits.Exploit):
     __info__ = {
         'name': 'S7 300/400 PLC Password Bruteforce',
         'description': 'Module performs bruteforce attack against S7 300/400 Device. '
-                       'If valid community string is found, it is displayed to the user.',
+                       'If valid password string is found, it is displayed to the user.',
         'authors': [
             'wenzhe zhu <jtrkid[at]gmail.com>',
         ],

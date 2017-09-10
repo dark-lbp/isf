@@ -55,7 +55,7 @@
        threads             3                                                                                               Number of threads
        stop_on_success     yes                                                                                             Stop on first valid community string
        verbose             0                                                                                               Verbose scapy output. 1: display, 0: hide
-       password            file:///Users/zhuwz/mywork_space/Projects/Hack/isf-public/icssploit/wordlists/passwords.txt     password string or file with community strings (file://)
+       password            file:///root/Desktop/temp/isf/icssploit/wordlists/passwords.txt                                 password string or file with community strings (file://)
        rack                0                                                                                               CPU rack number.
 
     isf (S7 300/400 PLC Password Bruteforce) > set target 192.168.1.10
