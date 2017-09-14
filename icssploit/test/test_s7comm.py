@@ -685,3 +685,10 @@ class S7commTests(icssploitTestCase):
         self.assertEqual(packet.haslayer(S7ForceParameterRsp), True)
         self.assertEqual(packet.haslayer(S7ForceDataRsp), True)
 
+    def test_s7_write_var_data_req(self):
+        packet = S7WriteVarDataReq(Items=[S7WriteVarDataItemsReq(TransportSize=0x03, Data='\x01'),
+                                          S7WriteVarDataItemsReq(TransportSize=0x04, Data='\x0a\x14\x1e')]
+                                   )
+        packet.show()
+        data = str(packet).encode('hex')
+        self.assertEqual(str(packet).encode('hex'), "000300010100000400180a141e")

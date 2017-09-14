@@ -1061,6 +1061,13 @@ class S7WriteVarDataReq(Packet):
         PacketListField("Items", None, S7WriteVarDataItemsReq)
     ]
 
+    def post_build(self, pkt, pay):
+        # Last item didn't need fill byte
+        if len(self.Items[-1].Data) % 2 == 1:
+            return pkt[:-1] + pay
+        else:
+            return pkt + pay
+
 
 class S7WriteVarParameterRsp(Packet):
     fields_desc = [
