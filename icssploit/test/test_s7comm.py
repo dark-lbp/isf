@@ -415,8 +415,8 @@ class S7commTests(icssploitTestCase):
         self.assertEqual(packet.haslayer(TPKT), True)
         self.assertEqual(packet.haslayer(COTPDT), True)
         self.assertEqual(packet.haslayer(S7Header), True)
-        self.assertEqual(packet.haslayer(S7ReadVarItemsRsp), True)
-        self.assertEqual(packet[S7ReadVarItemsRsp].ReturnCode, 0x0a)
+        self.assertEqual(packet.haslayer(S7ReadVarDataItemsRsp), True)
+        self.assertEqual(packet[S7ReadVarDataItemsRsp].ReturnCode, 0x0a)
 
     def test_read_var_m_req(self):
         data = '0300001f02f080320100001d00000e00' \
@@ -439,10 +439,10 @@ class S7commTests(icssploitTestCase):
         self.assertEqual(packet.haslayer(TPKT), True)
         self.assertEqual(packet.haslayer(COTPDT), True)
         self.assertEqual(packet.haslayer(S7Header), True)
-        self.assertEqual(packet.haslayer(S7ReadVarItemsRsp), True)
-        self.assertEqual(packet[S7ReadVarItemsRsp].ReturnCode, 0xff)
-        self.assertEqual(packet[S7ReadVarItemsRsp].BitDataLength, 0x08)
-        self.assertEqual(packet[S7ReadVarItemsRsp].Data, '\x00')
+        self.assertEqual(packet.haslayer(S7ReadVarDataItemsRsp), True)
+        self.assertEqual(packet[S7ReadVarDataItemsRsp].ReturnCode, 0xff)
+        self.assertEqual(packet[S7ReadVarDataItemsRsp].DataLength, 0x08)
+        self.assertEqual(packet[S7ReadVarDataItemsRsp].Data, '\x00')
 
     def test_write_var_m_req(self):
         data = '0300002402f080320100000e00000e00' \
@@ -485,7 +485,7 @@ class S7commTests(icssploitTestCase):
         self.assertEqual(packet.haslayer(COTPDT), True)
         self.assertEqual(packet.haslayer(S7Header), True)
         self.assertEqual(packet.haslayer(S7WriteVarParameterReq), True)
-        self.assertEqual(packet[S7WriteVarDataReq].Items[0].BitDataLength, 0x40)
+        self.assertEqual(packet[S7WriteVarDataReq].Items[0].DataLength, 0x40)
         self.assertEqual(len(packet[S7WriteVarDataReq].Items), 0x05)
 
     def test_write_multi_var_rsp(self):
@@ -518,7 +518,7 @@ class S7commTests(icssploitTestCase):
         self.assertEqual(packet.haslayer(COTPDT), True)
         self.assertEqual(packet.haslayer(S7Header), True)
         self.assertEqual(packet.haslayer(S7WriteVarParameterReq), True)
-        self.assertEqual(packet[S7WriteVarDataReq].Items[0].BitDataLength, 0x38)
+        self.assertEqual(packet[S7WriteVarDataReq].Items[0].DataLength, 0x38)
         self.assertEqual(len(packet[S7WriteVarDataReq].Items), 0x05)
 
     def test_write_multi_var_with_padding_rsp(self):

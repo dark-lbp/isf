@@ -22,6 +22,7 @@ S7_BLOCK_LANG_TYPE = {
     0x29: "ENCRYPT"
 }
 
+
 S7_BLOCK_TYPE = {
     0x38: "OB",
     0x41: "DB",
@@ -31,6 +32,7 @@ S7_BLOCK_TYPE = {
     0x45: "FB",
     0x46: "SFB"
 }
+
 
 S7_AREA_TYPE = {
     0x03: "SYSInfo",        # System info of 200 family
@@ -45,13 +47,15 @@ S7_AREA_TYPE = {
     0x85: "DI",             # Instance data blocks
     0x86: "Local",          # Local data (should not be accessible over network) */
     0x87: "V",              # Previous (Vorgaenger) local data (should not be accessible over network)
-    0x1C: "Counter",        # S7 counters
-    0x1D: "Timer",          # S7 timers
-    0x1E: "Counter200",     # IEC counters (200 family)
-    0x1F: "Timer200"        # IEC timers (200 family)
+    0x1c: "Counter",        # S7 counters
+    0x1d: "Timer",          # S7 timers
+    0x1e: "Counter200",     # IEC counters (200 family)
+    0x1f: "Timer200"        # IEC timers (200 family)
 }
 
+
 S7_PDU_TYPE = {0x01: "Job", 0x02: "Ack", 0x03: "AckData", 0x07: "UserData"}
+
 
 S7_ERROR_CLASS = {
     0x00: "No Error (0x00)",
@@ -59,21 +63,64 @@ S7_ERROR_CLASS = {
     0xd604: "The connection has already been enabled (0xd604)"
 }
 
+
 S7_RETURN_CODE = {
     0x00: "Reserved (0x00)",
     0x0a: "Object does not exist (0x0a)",
     0xff: "success (0xff)"
 }
 
-S7_TRANSPORT_SIZE = {
+
+S7_TRANSPORT_SIZE_IN_PARM_ITEMS = {
+    0x00: "Null (0x00)",
+    # Types of 1 byte length
+    0x01: "BIT (0x01)",
+    0x02: "BYTE (0x02)",
+    0x03: "CHAR (0x03)",
+    # Types of 2 bytes length
+    0x04: "WORD (0x04)",
+    0x05: "INT (0x05)",
+    # Types of 4 bytes length
+    0x06: "DWORD (0x06)",
+    0x07: "DINT (0x07)",
+    0x08: "REAL (0x08)",
+    # Special types
+    0x09: "Str (0x09)",
+    0x0a: "TOD (0x0a)",
+    0x0b: "TIME (0x0b)",
+    0x0c: "S5TIME (0x0c)",
+    0x0f: "DATE_AND_TIME (0x0f)",
+    # Timer or counter
+    0x1c: "COUNTER (0x0f)",
+    0x1d: "TIMER (0x0f)",
+    0x1e: "IEC TIMER (0x0f)",
+    0x1f: "IEC COUNTER (0x0f)",
+    0x20: "HS COUNTER (0x0f)",
+}
+
+
+S7_TRANSPORT_SIZE_IN_DATA_ITEMS = {
     0x00: "Null (0x00)",                #
-    0x02: "Byte (0x02)",                # Byte access, len is in bits
-    0x03: "Bit (0x03)",                 # Bit access, len is in bits
+    0x03: "BIT (0x03)",                 # Bit access, len is in bits
     0x04: "BYTE/WORD/DWORD (0x04)",     # BYTE/WORD/DWORD access, len is in bits
-    0x05: "Int (0x05)",                 # Integer access, len is in bits
+    0x05: "INTEGER (0x05)",             # Integer access, len is in bits
+    0x06: "DINTEGER (0x06)",            # Integer access, len is in bytes
     0x07: "Real (0x07)",                # Real access, len is in bytes
     0x09: "Str (0x09)"                  # Octet string, len is in bytes
 }
+
+
+S7_TRANSPORT_SIZE_LENGTH_IN_DATA_ITEMS = {
+    0x00: 0,
+    # TODO: Check bit Length calculation, only support 1 bit for now.
+    0x03: 1,                            # BIT
+    0x04: 8,
+    0x05: 8,
+    0x06: 1,
+    0x07: 1,
+    0x09: 1
+}
+
 
 S7_UD_FUNCTION_GROUP = {
     0x0: "Mode-transition",
@@ -242,7 +289,6 @@ S7_SUBSCRIBED_EVENTS = [
     "Unknown4",
     "Alarms"
 ]
-
 
 
 class TPKT(Packet):
@@ -579,7 +625,7 @@ class S7ReadSZLParameterReq(Packet):
 class S7ReadSZLDataReq(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         FieldLenField("Length", None, fmt="H", length_of="SZLIndex", adjust=lambda pkt, x: x + 2),
         XShortField("SZLId", 0x001c),
         XShortField("SZLIndex", 0x0000)
@@ -616,7 +662,7 @@ bind_layers(S7ReadSZLDataTreeRsp, Padding)
 class S7ReadSZLDataRsp(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         XShortField("Length", None),
         XShortField("SZLId", 0x001c),
         XShortField("SZLIndex", 0x0000),
@@ -653,7 +699,7 @@ class S7MessageServiceParameterReq(Packet):
 class S7MessageServiceDataReq(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         FieldLenField("Length", None, fmt="H", length_of="UserName", adjust=lambda pkt, x: x + 2),
         FlagsField("SubscribedEvents", 0, 8, S7_SUBSCRIBED_EVENTS),
         ByteField("Unknown1", 0x0),
@@ -685,7 +731,7 @@ class S7MessageServiceParameterRsp(Packet):
 class S7MessageServiceDataRsp(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         XShortField("Length", 2),
         XByteField("Result", 0x2),
         XByteField("Reserved", 0x0)
@@ -694,8 +740,8 @@ class S7MessageServiceDataRsp(Packet):
 
 class S7ForceDataReq(Packet):
     fields_desc = [
-        ByteEnumField("ReturnCode", 0x0a, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         FieldLenField("DataLength", None, fmt="H", length_of="Data", adjust=lambda pkt, x: x),
         StrLenField("Data", "00140004000000000001000000010001000100010001000000000000".decode('hex'),
                     length_from=lambda x: x.DataLength)
@@ -705,7 +751,7 @@ class S7ForceDataReq(Packet):
 class S7ForceParameterReq(Packet):
     fields_desc = [
         StrFixedLenField("ParameterHead", "\x00\x01\x12", length=3),
-        XByteField("ParameterLength", 0x04),
+        XByteField("ParameterLength", 0x08),
         XByteField("Unknown", 0x12),
         BitEnumField("Type", 4, 4, S7_UD_PARAMETER_TYPE),
         BitEnumField("FunctionGroup", 1, 4, S7_UD_FUNCTION_GROUP),
@@ -719,8 +765,8 @@ class S7ForceParameterReq(Packet):
 
 class S7ForceDataRsp(Packet):
     fields_desc = [
-        ByteEnumField("ReturnCode", 0x0a, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         FieldLenField("DataLength", None, fmt="H", length_of="Data", adjust=lambda pkt, x: x),
         StrLenField("Data", "\x00", length_from=lambda x: x.DataLength),
 
@@ -745,7 +791,7 @@ class S7ForceParameterRsp(Packet):
 class S7ListBlockDataReq(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0x0a, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x00, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x00, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         XShortField("Length", 0x0000)
     ]
 
@@ -775,7 +821,7 @@ bind_layers(S7ListBlockDataBlocksRsp, Padding)
 class S7ListBlockDataRsp(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         FieldLenField("DataLength", None, fmt="H", length_of="Blocks"),
         PacketListField("Blocks", [], S7ListBlockDataBlocksRsp, length_from=lambda p: p.DataLength)
     ]
@@ -799,7 +845,7 @@ class S7ListBlockParameterRsp(Packet):
 class S7ListBlockOfTypeDataReq(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         FieldLenField("DataLength", None, fmt="H", length_of="BlockType", adjust=lambda pkt, x: x),
         StrFixedLenEnumField("BlockType", "08", enum=S7_BLOCK_TYPE_IN_FILE_NAME, length=2),
     ]
@@ -830,7 +876,7 @@ bind_layers(S7ListBlockOfTypeDataBlocksRsp, Padding)
 class S7ListBlockOfTypeDataRsp(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         FieldLenField("DataLength", None, fmt="H", length_of="Blocks"),
         PacketListField("Blocks", [], S7ListBlockOfTypeDataBlocksRsp, length_from=lambda p:p.DataLength)
     ]
@@ -854,7 +900,7 @@ class S7ListBlockOfTypeParameterRsp(Packet):
 class S7GetBlockInfoDataReq(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         FieldLenField("DataLength", None, fmt="H", length_of="Blocks"),
         StrFixedLenEnumField("BlockType", "08", enum=S7_BLOCK_TYPE_IN_FILE_NAME, length=2),
         StrFixedLenField("BlockNum", "00000", length=5),
@@ -913,7 +959,7 @@ class S7ReadVarItemsReq(Packet):
         XByteField("VariableSpecification", 0x12),
         XByteField("ParameterLength", None),
         XByteField("SyntaxId", 0x10),
-        ByteEnumField("TransportSize", 0x02, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x02, S7_TRANSPORT_SIZE_IN_PARM_ITEMS),
         XShortField("GetLength", 0x0016),
         XShortField("BlockNum", 0x0000),
         ByteEnumField("AREAType", 0x84, S7_AREA_TYPE),
@@ -935,19 +981,31 @@ class S7ReadVarParameterReq(Packet):
     ]
 
 
-class S7ReadVarItemsRsp(Packet):
+class S7ReadVarDataItemsRsp(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x04, S7_TRANSPORT_SIZE),
-        FieldLenField("BitDataLength", None, fmt="H", length_of="Data", adjust=lambda pkt, x: x * 8),
-        StrLenField("Data", "\x00", length_from=lambda p: p[S7ReadVarItemsRsp].BitDataLength / 8)
+        ByteEnumField("TransportSize", 0x04, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
+        FieldLenField("DataLength", None, fmt="H",
+                      length_of="Data",
+                      adjust=lambda pkt, x: x * S7_TRANSPORT_SIZE_LENGTH_IN_DATA_ITEMS[pkt.TransportSize]),
+        ConditionalField(
+            PadField(
+                StrLenField("Data", "\x00",
+                            length_from=lambda p: p[S7ReadVarDataItemsRsp].DataLength /
+                                                  S7_TRANSPORT_SIZE_LENGTH_IN_DATA_ITEMS[p.TransportSize]
+                            ),
+                align=2, padwith="\x00"
+            ),
+            lambda pkt: True if pkt.ReturnCode == 0xff else False
+        ),
+
     ]
 
-bind_layers(S7ReadVarItemsRsp, Padding)
+bind_layers(S7ReadVarDataItemsRsp, Padding)
 
 
 class S7ReadVarDataRsp(Packet):
-    fields_desc = [PacketListField("Items", None, S7ReadVarItemsRsp)]
+    fields_desc = [PacketListField("Items", None, S7ReadVarDataItemsRsp)]
 
 
 class S7ReadVarParameterRsp(Packet):
@@ -962,8 +1020,8 @@ class S7WriteVarItemsReq(Packet):
         XByteField("VariableSpecification", 0x12),
         XByteField("ParameterLength", 0x0a),
         XByteField("SyntaxId", 0x10),
-        ByteEnumField("TransportSize", 0x02, S7_TRANSPORT_SIZE),
-        XShortField("BitLength", 0x0016),
+        ByteEnumField("TransportSize", 0x02, S7_TRANSPORT_SIZE_IN_PARM_ITEMS),
+        XShortField("ItemCount", 0x0016),
         XShortField("BlockNum", 0x0000),
         ByteEnumField("AREAType", 0x84, S7_AREA_TYPE),
         X3BytesField("BitAddress", 0x000000)
@@ -983,12 +1041,15 @@ class S7WriteVarParameterReq(Packet):
 class S7WriteVarDataItemsReq(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0x00, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x04, S7_TRANSPORT_SIZE),
-        FieldLenField("BitDataLength", None, fmt="H", length_of="Data", adjust=lambda p, x: x * 8),
-        PadField(
-            StrLenField("Data", "\x00", length_from=lambda p: p.BitDataLength / 8),
-            align=2, padwith="\x18"
-        )
+        ByteEnumField("TransportSize", 0x04, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
+        FieldLenField("DataLength", None, fmt="H",
+                      length_of="Data",
+                      adjust=lambda pkt, x: x * S7_TRANSPORT_SIZE_LENGTH_IN_DATA_ITEMS[pkt.TransportSize]),
+        PadField(StrLenField("Data", "\x00", length_from=lambda p: p[S7WriteVarDataItemsReq].DataLength /
+                                                                S7_TRANSPORT_SIZE_LENGTH_IN_DATA_ITEMS[p.TransportSize]
+                             ),
+                 align=2, padwith="\x00"
+                 )
     ]
 
 bind_layers(S7WriteVarDataItemsReq, Padding)
@@ -1213,7 +1274,7 @@ class S7UploadBlockEndParameterRsp(Packet):
 class S7PasswordDataReq(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         FieldLenField("DataLength", None, fmt="H", length_of="Data", adjust=lambda pkt, x: x),
         StrLenField("Data", "\x00" * 8, length_from=lambda x: x.DataLength)
     ]
@@ -1234,7 +1295,7 @@ class S7PasswordParameterReq(Packet):
 class S7PasswordDataRsp(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0xff, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x09, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         FieldLenField("DataLength", None, fmt="H", length_of="Data", adjust=lambda pkt, x: x),
         StrLenField("Data", None, length_from=lambda x: x.DataLength)
     ]
@@ -1258,7 +1319,7 @@ class S7PasswordParameterRsp(Packet):
 class S7CleanSessionDataReq(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0x0a, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x00, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x00, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         XShortField("Length", 0x0000)
     ]
 
@@ -1266,7 +1327,7 @@ class S7CleanSessionDataReq(Packet):
 class S7CleanSessionDataRsp(Packet):
     fields_desc = [
         ByteEnumField("ReturnCode", 0x0a, S7_RETURN_CODE),
-        ByteEnumField("TransportSize", 0x00, S7_TRANSPORT_SIZE),
+        ByteEnumField("TransportSize", 0x00, S7_TRANSPORT_SIZE_IN_DATA_ITEMS),
         XShortField("Length", 0x0000)
     ]
 
