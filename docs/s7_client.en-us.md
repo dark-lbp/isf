@@ -169,7 +169,7 @@ For example 0x01 and "bit" is also mean bit type(case insensitive)
 
 `count`parameter define how many data you want to read.
 
-
+examples:
 ```python
 # Read bit from M zone at address 1
 >>> read_items = [("M", "1.0", "bit", 1)]
@@ -203,6 +203,12 @@ For example 0x01 and "bit" is also mean bit type(case insensitive)
 ```
 
 ## Write var
+The parameter of `write_var` is a list of `write_item` items, each `read_item` contain four parameter `area_type`,`address`, `data_type`, `data`.
+`area_type`,`address`, `data_type` is same as `read_item`。
+
+`data` parameter contain list of data your want to write to plc，data type should matching `data_type`.
+
+examples:
 ```python
 # Write bit to M zone at address 1
 >>> write_items = [("M", "1.0", "bit", [1])]
