@@ -594,8 +594,11 @@ class S7Client(Base):
     @staticmethod
     def get_transport_size_from_data_type(data_type):
         for key, name in S7_TRANSPORT_SIZE_IN_PARM_ITEMS.iteritems():
-            if name.startswith(data_type.upper()):
-                return key
+            if isinstance(data_type, str):
+                if name.startswith(data_type.upper()):
+                    return key
+            elif isinstance(data_type, int):
+                return data_type
         return None
 
     def get_item_pram_from_item(self, item):
@@ -605,24 +608,29 @@ class S7Client(Base):
         transport_size = ''
         try:
             for key in VAR_NAME_TYPES:
-                if item[0].startswith(key):
-                    area_type = VAR_NAME_TYPES[key]
-                    # Data block
-                    if area_type == 0x84:
-                        block_num = int(item[0][2:])
-                    else:
-                        block_num = 0
+                if isinstance(item[0], str):
+                    if item[0].startswith(key):
+                        area_type = VAR_NAME_TYPES[key]
 
-                    if isinstance(item[1], str):
-                        address_data = item[1].split('.')
-                        address = int(address_data[0]) * 8 + int(address_data[1])
-                        break
-                    elif isinstance(item[1], int):
-                        address = item[1]
-                        break
-                    else:
-                        self.logger.error("Address: %s is not string or int format, please check again" % item[1])
-                        break
+                elif isinstance(item[0], int):
+                    if item[0] in VAR_NAME_TYPES.keys():
+                        area_type = item[0]
+
+            # Data block
+            if area_type == 0x84:
+                block_num = int(item[0][2:])
+            else:
+                block_num = 0
+
+            if isinstance(item[1], str):
+                address_data = item[1].split('.')
+                address = int(address_data[0]) * 8 + int(address_data[1])
+
+            elif isinstance(item[1], int):
+                address = item[1]
+
+            else:
+                self.logger.error("Address: %s is not string or int format, please check again" % item[1])
 
             transport_size = self.get_transport_size_from_data_type(item[2])
 

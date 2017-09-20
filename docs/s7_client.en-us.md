@@ -114,9 +114,9 @@
 # Read/Write var
 
 ## Read var
-The parameter of `read_var` is a list of `read_item` items, each `read_item` contain four parameter `block`,`address`, `data_type`, `count`.
+The parameter of `read_var` is a list of `read_item` items, each `read_item` contain four parameter `area_type`,`address`, `data_type`, `count`.
 
-`block` parameter which block(zone) you want to read,: 
+`area_type` parameter which block(area) you want to read,: 
 supported block type(you can use both key or value as parameter):
 ```python
 {

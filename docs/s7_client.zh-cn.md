@@ -115,9 +115,9 @@
 # 读写PLC中的数据
 
 ## 读取PLC中的数据
-`read_var`指令的参数是包含了一组`read_item`的列表数据。每个`read_item` 共有四个参数`block`,`address`, `data_type`, `count`。
+`read_var`指令的参数是包含了一组`read_item`的列表数据。每个`read_item` 共有四个参数`area_type`,`address`, `data_type`, `count`。
 
-`block`参数定义了从哪个区块进行数据读取，目前支持的区块类型如下，可以任意选择key或者value作为参数: 
+`area_type`参数定义了从哪个区块进行数据读取，目前支持的区块类型如下，可以任意选择key或者value作为参数: 
 ```python
 {
 'P': 0x80,      # I/O
@@ -202,8 +202,8 @@
 ```
 
 ## 将输入写入PLC
-`write_var`指令的参数是包含了一组`write_item`的列表数据。每个`write_item` 共有四个参数`block`,`address`, `data_type`, `data`。
-其中`block`,`address`, `data_type`的参数与`read_item`相同。
+`write_var`指令的参数是包含了一组`write_item`的列表数据。每个`write_item` 共有四个参数`area_type`,`address`, `data_type`, `data`。
+其中`area_type`,`address`, `data_type`的参数与`read_item`相同。
 
 `data`参数代表的是需要写入的数据列表，写入的数据内容应与定义的`data_type`类型相符合。
 
