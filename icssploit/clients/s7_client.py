@@ -4,7 +4,19 @@
 from icssploit.core.base import Base
 from icssploit.protocols.s7comm import *
 from scapy.supersocket import StreamSocket
+from icssploit.thirdparty.bitstring import BitArray
 import socket
+
+
+VAR_NAME_TYPES = {
+    'P': 0x80,      # I/O
+    'I': 0x81,      # Memory area of inputs
+    'Q': 0x82,      # Memory area of outputs
+    'M': 0x83,      # Memory area of bit memory
+    'DB': 0x84,     # Data block
+    'L': 0x86,      # Local data
+    'V': 0x87       # Previous local data
+}
 
 
 class S7Client(Base):
@@ -40,8 +52,8 @@ class S7Client(Base):
 
     def connect(self):
         sock = socket.socket()
-        sock.connect((self._ip, self._port))
         sock.settimeout(self._timeout)
+        sock.connect((self._ip, self._port))
         self._connection = StreamSocket(sock, Raw)
         packet1 = TPKT() / COTPCR()
         packet1.Parameters = [COTPOption() for i in range(3)]
@@ -95,7 +107,7 @@ class S7Client(Base):
         rsp2 = self.send_receive_s7_packet(packet2)
         try:
             module_name_data = rsp2[S7ReadSZLDataTreeRsp].Data[
-                               rsp2[S7ReadSZLDataRsp].SZLLength + 2:rsp2[S7ReadSZLDataRsp].SZLLength * 2]
+                rsp2[S7ReadSZLDataRsp].SZLLength + 2:rsp2[S7ReadSZLDataRsp].SZLLength * 2]
             module_name = str(module_name_data[:module_name_data.index('\x00')])
             self.logger.debug("module_name:%s " % module_name)
             as_name_data = rsp2[S7ReadSZLDataTreeRsp].Data[2:rsp2[S7ReadSZLDataRsp].SZLLength]
@@ -142,10 +154,10 @@ class S7Client(Base):
                 self.writeable = False
 
     def auth(self, password):
-        '''
-
+        """
+        
         :param password: Paintext PLC password.
-        '''
+        """
         self.logger.info("Start authenticate with password %s" % password)
         password_hash = self._hash_password(password)
         packet1 = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="UserData", Parameters=S7PasswordParameterReq(),
@@ -491,7 +503,6 @@ class S7Client(Base):
                                                         MC7Length=mc7_length)
                                                     )
         rsp1 = self.send_receive_s7_packet(packet1)
-        # print(len(rsp1))
         if rsp1.ErrorClass != 0x0:
             self.logger.error("Can't Download %s%s to targets" % (block_type, block_num))
             self.logger.error("Error Class: %s, Error Code %s" % (rsp1.ErrorClass, rsp1.ErrorCode))
@@ -580,7 +591,271 @@ class S7Client(Base):
         time.sleep(2)  # wait targets to start
         self.get_target_status()
 
+    @staticmethod
+    def get_transport_size_from_data_type(data_type):
+        for key, name in S7_TRANSPORT_SIZE_IN_PARM_ITEMS.iteritems():
+            if name.startswith(data_type.upper()):
+                return key
+        return None
 
+    def get_item_pram_from_item(self, item):
+        block_num = ''
+        area_type = ''
+        address = ''
+        transport_size = ''
+        try:
+            for key in VAR_NAME_TYPES:
+                if item[0].startswith(key):
+                    area_type = VAR_NAME_TYPES[key]
+                    # Data block
+                    if area_type == 0x84:
+                        block_num = int(item[0][2:])
+                    else:
+                        block_num = 0
 
+                    if isinstance(item[1], str):
+                        address_data = item[1].split('.')
+                        address = int(address_data[0]) * 8 + int(address_data[1])
+                        break
+                    elif isinstance(item[1], int):
+                        address = item[1]
+                        break
+                    else:
+                        self.logger.error("Address: %s is not string or int format, please check again" % item[1])
+                        break
 
+            transport_size = self.get_transport_size_from_data_type(item[2])
 
+        except Exception as err:
+            self.logger.error("Can't get item parameter with var_name: %s with error: \r %s" % (item, err))
+            return transport_size, block_num, area_type, address
+
+        return transport_size, block_num, area_type, address
+
+    @staticmethod
+    def bytes_to_bit_array(bytes_data):
+        bit_array = ""
+        for data in bytes_data:
+            bit_array += BitArray(bytes=data, length=8).bin
+        return map(int, list(bit_array))
+
+    def _unpack_data_with_transport_size(self, req_item, rsp_item):
+        # ref http://www.plcdev.com/step_7_elementary_data_types
+        if isinstance(rsp_item, S7ReadVarDataItemsRsp):
+            try:
+                req_type = req_item.TransportSize
+                if req_type not in S7_TRANSPORT_SIZE_IN_PARM_ITEMS.keys():
+                    return []
+                # BIT (0x01)
+                elif req_type == 0x01:
+                    bit_list = self.bytes_to_bit_array(rsp_item.Data)
+                    return bit_list[-1:][0]
+                # BYTE (0x02)
+                elif req_type == 0x02:
+                    byte_list = list(rsp_item.Data)
+                    return map(ord, byte_list)
+                # CHAR (0x03)
+                elif req_type == 0x03:
+                    char_list = list(rsp_item.Data)
+                    return char_list
+                # WORD (0x04) 2 bytes Decimal number unsigned
+                elif req_type == 0x04:
+                    word_data = rsp_item.Data
+                    word_list = [struct.unpack('!H', word_data[i:i+2])[0] for i in range(0, len(word_data), 2)]
+                    return word_list
+                # INT (0x05) 2 bytes Decimal number signed
+                elif req_type == 0x05:
+                    int_data = rsp_item.Data
+                    int_list = [struct.unpack('!h', int_data[i:i+2])[0] for i in range(0, len(int_data), 2)]
+                    return int_list
+                # DWORD (0x06) 4 bytes Decimal number unsigned
+                elif req_type == 0x06:
+                    dword_data = rsp_item.Data
+                    dword_list = [struct.unpack('!I', dword_data[i:i+4])[0] for i in range(0, len(dword_data), 4)]
+                    return dword_list
+                # DINT (0x07) 4 bytes Decimal number signed
+                elif req_type == 0x07:
+                    dint_data = rsp_item.Data
+                    dint_list = [struct.unpack('!i', dint_data[i:i+4])[0] for i in range(0, len(dint_data), 4)]
+                    return dint_list
+                # REAL (0x08) 4 bytes IEEE Floating-point number
+                elif req_type == 0x08:
+                    dint_data = rsp_item.Data
+                    dint_list = [struct.unpack('!f', dint_data[i:i+4])[0] for i in range(0, len(dint_data), 4)]
+                    return dint_list
+                else:
+                    return rsp_item.Data
+
+            except Exception as err:
+                return []
+        return []
+
+    @staticmethod
+    def _pack_data_with_transport_size(req_item, data_list):
+        # ref http://www.plcdev.com/step_7_elementary_data_types
+        if isinstance(req_item, S7WriteVarItemsReq):
+            try:
+                req_type = req_item.TransportSize
+                if req_type not in S7_TRANSPORT_SIZE_IN_PARM_ITEMS.keys():
+                    return []
+                # BIT (0x01)
+                elif req_type == 0x01:
+                    # Only support write 1 bit.
+                    if isinstance(data_list, list):
+                        bit_data = chr(data_list[0])
+                    else:
+                        bit_data = chr(data_list)
+                    return bit_data
+                # BYTE (0x02)
+                elif req_type == 0x02:
+                    byte_data = ''.join(chr(x) for x in data_list)
+                    return byte_data
+                # CHAR (0x03)
+                elif req_type == 0x03:
+                    char_data = ''.join(x for x in data_list)
+                    return char_data
+                # WORD (0x04) 2 bytes Decimal number unsigned
+                elif req_type == 0x04:
+                    word_data = ''.join(struct.pack('!H', x) for x in data_list)
+                    return word_data
+                # INT (0x05) 2 bytes Decimal number signed
+                elif req_type == 0x05:
+                    int_data = ''.join(struct.pack('!h', x) for x in data_list)
+                    return int_data
+                # DWORD (0x06) 4 bytes Decimal number unsigned
+                elif req_type == 0x06:
+                    dword_data = ''.join(struct.pack('!I', x) for x in data_list)
+                    return dword_data
+                # DINT (0x07) 4 bytes Decimal number signed
+                elif req_type == 0x07:
+                    dint_data = ''.join(struct.pack('!i', x) for x in data_list)
+                    return dint_data
+                # REAL (0x08) 4 bytes IEEE Floating-point number
+                elif req_type == 0x08:
+                    real_data = ''.join(struct.pack('!f', x) for x in data_list)
+                    return real_data
+                # Other data
+                else:
+                    other_data = ''.join(x for x in data_list)
+                    return other_data
+
+            except Exception as err:
+                return ''
+        return ''
+
+    @staticmethod
+    def _convert_transport_size_from_parm_to_data(parm_transport_size):
+        if parm_transport_size not in S7_TRANSPORT_SIZE_IN_PARM_ITEMS.keys():
+            return None
+        else:
+            # BIT (0x03)
+            if parm_transport_size == 0x01:
+                return 0x03
+            # BYTE/WORD/DWORD (0x04)
+            elif parm_transport_size in (0x02, 0x04, 0x06):
+                return 0x04
+            # INTEGER (0x05)
+            elif parm_transport_size in (0x05, 0x07):
+                return 0x05
+            # REAL (0x07)
+            elif parm_transport_size == 0x08:
+                return 0x07
+            # OCTET STRING (0x09)
+            else:
+                return 0x09
+
+    def read_var(self, items):
+        '''
+
+        :param items:
+        :return: Return data list of read_var items.
+        '''
+        read_items = []
+        items_data = []
+
+        if isinstance(items, list):
+            for i in range(len(items)):
+                try:
+                    transport_size, block_num, area_type, address = self.get_item_pram_from_item(items[i])
+                    length = int(items[i][3])
+                    if transport_size:
+                        read_items.append(S7ReadVarItemsReq(TransportSize=transport_size,
+                                                            GetLength=length,
+                                                            BlockNum=block_num,
+                                                            AREAType=area_type,
+                                                            Address=address
+                                                            )
+                                          )
+                except Exception as err:
+                    self.logger.error("Can't create read var packet because of: \r %s" % err)
+                    return None
+        else:
+            self.logger.error("items is not list please check again")
+            return None
+
+        packet = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="Job", Parameters=S7ReadVarParameterReq(
+            Items=read_items))
+        rsp = self.send_receive_s7_packet(packet)
+        if rsp.ErrorClass != 0x0:
+            self.logger.error("Can't Read var from Target")
+            self.logger.error("Error Class: %s, Error Code %s" % (rsp.ErrorClass, rsp.ErrorCode))
+            return None
+        if rsp.haslayer(S7ReadVarDataItemsRsp):
+            for i in range(len(rsp[S7ReadVarDataRsp].Items)):
+                req_item = read_items[i][S7ReadVarItemsReq]
+                rsp_item = rsp[S7ReadVarDataRsp].Items[i]
+                if rsp_item.ReturnCode == 0xff:
+                    rsp_item_data = self._unpack_data_with_transport_size(req_item, rsp_item)
+                    items_data.append(rsp_item_data)
+                else:
+                    items_data.append('')
+        return items_data
+
+    def write_var(self, items):
+        """
+
+        :param items:
+        :return:
+        """
+        write_items = []
+        items_data = []
+        write_data_rsp = []
+        if isinstance(items, list):
+            for i in range(len(items)):
+                try:
+                    transport_size, block_num, area_type, address = self.get_item_pram_from_item(items[i])
+                    length = len(items[i][3])
+                    if transport_size:
+                        write_items.append(S7WriteVarItemsReq(TransportSize=transport_size,
+                                                              ItemCount=length,
+                                                              BlockNum=block_num,
+                                                              AREAType=area_type,
+                                                              BitAddress=address
+                                                              )
+                                           )
+                        write_data = self._pack_data_with_transport_size(write_items[i], items[i][3])
+                        items_data.append(S7WriteVarDataItemsReq(
+                            TransportSize=self._convert_transport_size_from_parm_to_data(transport_size),
+                            Data=write_data))
+                except Exception as err:
+                    self.logger.error("Can't create write var packet because of: \r %s" % err)
+                    return None
+        else:
+            self.logger.error("items is not list please check again")
+            return None
+
+        packet = TPKT() / COTPDT(EOT=1) / S7Header(ROSCTR="Job",
+                                                   Parameters=S7WriteVarParameterReq(Items=write_items),
+                                                   Data=S7WriteVarDataReq(Items=items_data))
+        rsp = self.send_receive_s7_packet(packet)
+        if rsp.ErrorClass != 0x0:
+            self.logger.error("Can't write var to Target.")
+            self.logger.error("Error Class: %s, Error Code %s" % (rsp.ErrorClass, rsp.ErrorCode))
+            return None
+        if rsp.haslayer(S7WriteVarDataRsp):
+            for rsp_items in rsp[S7WriteVarDataRsp].Items:
+                write_data_rsp.append(rsp_items.ReturnCode)
+            return write_data_rsp
+        else:
+            self.logger.error("Unknown response packet format.")
+            return None

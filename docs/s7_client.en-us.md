@@ -105,9 +105,134 @@
 
 # Download block to target
 ```python
-# Download OB1 block to target (this block data is example, plese use correct block data to downlaod)
+# Download OB1 block to target (this block data is example, please use correct block data to downlaod)
 >>> block_data = 'pp\x01\x01\x02\x08\x00\x01\x00\x00\x00\xb4\x00......\x00\x00\x00'
 >>> target.download_block_to_target(block_data)
 [INFO    ][s7_client.download_block_to_target] Start download OB1 to targets
 [INFO    ][s7_client.download_block_to_target] Download OB1 to target succeed
+```
+# Read/Write var
+
+## Read var
+The parameter of `read_var` is a list of `read_item` items, each `read_item` contain four parameter `block`,`address`, `data_type`, `count`.
+
+`block` parameter which block(zone) you want to read,: 
+supported block type(you can use both key or value as parameter):
+```python
+{
+'P': 0x80,      # I/O
+'I': 0x81,      # Memory area of inputs
+'Q': 0x82,      # Memory area of outputs
+'M': 0x83,      # Memory area of bit memory
+'DB': 0x84,     # Data block
+'L': 0x86,      # Local data
+'V': 0x87       # Previous local data
+}
+```
+
+`address`  parameter is the bit offset of block, it's define the start bit address you want to read.
+There are two method You can set address parameter.
+* BYTE.BIT(str type) - For example "1.0" mean start from second byte and first bit, it's equal to 9th bit(address start with 0). 
+* BIT(int type) - directly use bit count, 8 mean start from 9th bit(address start with 0)。
+
+`data_type` parameter is the data type you want to read.
+Supported data type(you can use both key or value keyword as parameter):
+For example 0x01 and "bit" is also mean bit type(case insensitive)
+```python
+{
+    0x00: "Null (0x00)",
+    # Types of 1 byte length
+    0x01: "BIT (0x01)",
+    0x02: "BYTE (0x02)",
+    0x03: "CHAR (0x03)",
+    # Types of 2 bytes length
+    0x04: "WORD (0x04)",
+    0x05: "INT (0x05)",
+    # Types of 4 bytes length
+    0x06: "DWORD (0x06)",
+    0x07: "DINT (0x07)",
+    0x08: "REAL (0x08)",
+    # Special types
+    0x09: "Str (0x09)",
+    0x0a: "TOD (0x0a)",
+    0x0b: "TIME (0x0b)",
+    0x0c: "S5TIME (0x0c)",
+    0x0f: "DATE_AND_TIME (0x0f)",
+    # Timer or counter
+    0x1c: "COUNTER (0x0f)",
+    0x1d: "TIMER (0x0f)",
+    0x1e: "IEC TIMER (0x0f)",
+    0x1f: "IEC COUNTER (0x0f)",
+    0x20: "HS COUNTER (0x0f)",
+}
+```
+
+`count`parameter define how many data you want to read.
+
+
+```python
+# Read bit from M zone at address 1
+>>> read_items = [("M", "1.0", "bit", 1)]
+>>> target.read_var(read_items)
+[1]
+
+# Read 3 Bytes from DB1 at address 2
+>>> read_items = [("DB1", "2.0", "byte", 3)]
+>>> target.read_var(read_items)
+[[10, 20, 30]]
+
+# read 2 Word from M zone at address 10
+>>> read_items = [("M", "10.0", "word", 2)]
+>>> target.read_var(read_items)
+[[1, 2]]
+
+# Read 2 Real from M zone at address 20
+>>> read_items = [("M", "20.0", "real", 2)]
+>>> target.read_var(read_items)
+[[0.10000000149011612, 1.100000023841858]]
+
+# Read 2 Int from M zone at address 30
+>>> read_items = [("M", "30.0", "int", 2)]
+>>> target.read_var(read_items)
+[[100, -100]]
+
+# Read multi var from plc
+>>> read_items = [("M", "1.0", "bit", 1), ("DB1", "2.0", "byte", 3), ("M", "10.0", "word", 2), ("M", "30.0", "int", 2)]
+>>> target.read_var(read_items)
+[1, [10, 20, 30], [1, 2], [100, -100]]
+```
+
+## Write var
+```python
+# Write bit to M zone at address 1
+>>> write_items = [("M", "1.0", "bit", [1])]
+# write_var will return a list contain each write var item's return code. 255(0xff) mean success.
+>>> target.write_var(write_items)
+[255]
+
+# Write 3 Bytes to DB1  at address 2
+>>> write_items = [("DB1", "2.0", "byte", [10, 20, 30])]
+>>> target.write_var(write_items)
+[255]
+
+# Write 2 Word to M zone at address 10
+>>> write_items = [("M", "10.0", "word", [1, 2])]
+>>> target.write_var(write_items)
+[255]
+
+# Write 2 Real to M zone at address 20
+>>> write_items = [("M", "20.0", "real", [0.1, 1.1])]
+>>> target.write_var(write_items)
+[255]
+
+# Write 2 Int to M zone at address 30
+>>> write_items = [("M", "30.0", "int", [100, -100])]
+>>> target.write_var(write_items)
+[255]
+
+# Write multi var to plc
+>>> write_items = [("M", "1.0", "bit", [1]), ("DB1", "2.0", "byte", [10, 20, 30]), ("M", "10.0", "word", [1, 2])]
+# write_var will return a list contain each write var item's return code. 255(0xff) mean success.
+>>> target.write_var(write_items)
+[255, 255, 255]
 ```
