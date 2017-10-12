@@ -29,6 +29,7 @@ ISF is based on open source project [routersploit](https://github.com/reverse-sh
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
 | profinet_dcp_scan       | scanners/profinet_dcp_scan.py                                     | Profinet DCP scanner                    |
 | vxworks_6_scan          | scanners/vxworks_6_scan.py                                        | Vxworks 6.x scanner                     |
+| s7comm_scan             | scanners/s7comm_scan.py                                           | S7comm scanner                          |
 
 
 

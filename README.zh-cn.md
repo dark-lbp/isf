@@ -29,6 +29,7 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
 | profinet-dcp-scan       | scanners/profinet-dcp-scan.py                                     | Profinet DCP 扫描器                      |
 | vxworks_6_scan          | scanners/vxworks_6_scan.py                                        | Vxworks 6.x 扫描器                       |
+| s7comm_scan             | scanners/s7comm_scan.py                                           | S7comm 扫描器                            |
 
 
 ## ICS 协议模块 (使用Scapy编写)
