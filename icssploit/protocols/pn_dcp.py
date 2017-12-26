@@ -142,6 +142,12 @@ DCP_SUBOPTION_IP_BLOCK_INFO = {
     0x82: "IP set by DHCP (address conflict detected) (0x82)"
 }
 
+
+DCP_SUBOPTION_IP_BLOCK_SET_TYPE = {
+    0x01: "Save the value permanent (0x01)"
+}
+
+
 DCP_BLOCK_ERROR_CODE = {
     0x00: "OK (0x00)",
     0x01: "Option unsupp (0x01)",
@@ -298,10 +304,11 @@ class PNDCPGetResponse(Packet):
     fields_desc = [
         ByteEnumField("Option", 0x01, DCP_OPTIONS),
         MultiEnumField("SubOption", 0x01, DCP_SUBOPTIONS, fmt='B', depends_on=lambda p: p.Option),
-        FieldLenField("DCPBlockLength", None, length_of="DCPBlock", fmt="!H", adjust=lambda pkt, x: x / x.DCPBlock),
+        FieldLenField("DCPBlockLength", None, length_of="DCPBlock", fmt="!H", adjust=lambda pkt, x: x),
         PNDCPBlockListField("DCPBlock", [], guess_dcp_get_response_block_class, length_from=lambda x: x.DCPBlockLength),
         PadField(StrLenField("Padding", "\x00", length_from=lambda p: p.DCPBlockLength % 2), 1, padwith="\x00")
     ]
+
 
 bind_layers(PNDCPGetResponse, Padding)
 
@@ -325,6 +332,7 @@ def guess_dcp_block_get_class(service_type, payload):
         return payload
     else:
         return payload
+
 
 ######################
 ## IDENT IP Request ##
@@ -446,6 +454,7 @@ def guess_dcp_ident_response_block_class(pkt, payload):
         elif pkt.Option == 0x06:
             return None
 
+
 ############################
 ## IDENT Response Header  ##
 ############################
@@ -453,10 +462,11 @@ class PNDCPIdentResponse(Packet):
     fields_desc = [
         ByteEnumField("Option", 0x01, DCP_OPTIONS),
         MultiEnumField("SubOption", 0x01, DCP_SUBOPTIONS, fmt='B', depends_on=lambda p: p.Option),
-        FieldLenField("DCPBlockLength", None, length_of="DCPBlock", fmt="!H", adjust=lambda pkt, x: x / x.DCPBlock),
+        FieldLenField("DCPBlockLength", None, length_of="DCPBlock", fmt="!H", adjust=lambda pkt, x: x),
         PNDCPBlockListField("DCPBlock", [], guess_dcp_ident_response_block_class, length_from=lambda x: x.DCPBlockLength),
         PadField(StrLenField("Padding", "\x00", length_from=lambda p: p.DCPBlockLength % 2), 1, padwith="\x00")
     ]
+
 
 bind_layers(PNDCPIdentResponse, Padding)
 
@@ -478,12 +488,51 @@ def guess_dcp_block_identify_class(service_type, payload):
         return PNDCPIdentResponse(payload)
     # Response - Request not supported (5)
     elif service_type == 0x05:
-        return None
+        return payload
 
 
-def guess_dcp_block_set_class(payload):
-    # TODO: Will Add when i get some packet.
-    return None
+#################
+## Set Request ##
+#################
+def guess_dcp_set_block_class(pkt, payload):
+    if isinstance(pkt, PNDCPSetRequest):
+        # IP Request (0x01)
+        if pkt.Option == 0x01:
+            if pkt.SubOption == 0x02:
+                return PNDCPSetIPParameterRequestBlock(payload)
+        else:
+            return payload
+
+    return payload
+
+
+class PNDCPSetIPParameterRequestBlock(Packet):
+    fields_desc = [
+        ShortEnumField("BlockQualifier", 0x01, DCP_SUBOPTION_IP_BLOCK_SET_TYPE),
+        IPField("IPaddress", "0.0.0.0"),
+        IPField("Subnetmask", "255.255.255.0"),
+        IPField("StandardGateway", "0.0.0.0")
+    ]
+
+
+class PNDCPSetRequest(Packet):
+    fields_desc = [
+        ByteEnumField("Option", 0x01, DCP_OPTIONS),
+        MultiEnumField("SubOption", 0x00, DCP_SUBOPTIONS, fmt='B', depends_on=lambda p: p.Option),
+        FieldLenField("DCPBlockLength", None, length_of="DCPBlock", fmt="!H", adjust=lambda pkt, x: x),
+        PNDCPBlockListField("DCPBlock", [], guess_dcp_set_block_class, length_from=lambda x: x.DCPBlockLength),
+    ]
+
+
+bind_layers(PNDCPSetRequest, Padding)
+
+
+def guess_dcp_block_set_class(service_type, payload):
+    # Request (0)
+    if service_type == 0x00:
+        if payload[0] == '\x01':
+            return PNDCPSetRequest(payload)
+    return payload
 
 
 def guess_dcp_block_class(pkt, payload):
@@ -491,9 +540,7 @@ def guess_dcp_block_class(pkt, payload):
         if pkt.ServiceID == 0x03:
             return guess_dcp_block_get_class(pkt.ServiceType, payload)
         elif pkt.ServiceID == 0x04:
-            # TODO: TODO: Will Add when i get some packet.
-            # return guess_dcp_block_set_class(pkt.ServiceType, payload)
-            return payload
+            return guess_dcp_block_set_class(pkt.ServiceType, payload)
         elif pkt.ServiceID == 0x05:
             return guess_dcp_block_identify_class(pkt.ServiceType, payload)
     else:
@@ -509,5 +556,6 @@ class PNDCPHeader(Packet):
         FieldLenField("DCPDataLength", None, length_of="DCPBlocks", fmt="!H", adjust=lambda pkt, x: x),
         PNDCPBlockListField("DCPBlocks", [], guess_dcp_block_class, length_from=lambda x: x.DCPDataLength)
     ]
+
 
 bind_layers(Ether, ProfinetIO, type=0x8892)
