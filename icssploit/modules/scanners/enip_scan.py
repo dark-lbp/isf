@@ -2,10 +2,12 @@ from icssploit import (
     exploits,
     validators,
 )
-import threading
 from icssploit.thirdparty import tabulate
 from icssploit.protocols.enip import *
-from scapy.all import *
+import threading
+from scapy.layers.inet import Ether, IP, UDP
+from scapy.arch import get_if_hwaddr, get_if_addr
+from scapy.sendrecv import sendp, sniff
 
 
 TABLE_HEADER = ["Product Name", "Device Type", "Vendor ", "Revision", "Serial Number", "IP Address"]
@@ -14,7 +16,7 @@ ENIP_DEVICES = []
 
 class Exploit(exploits.Exploit):
     __info__ = {
-        'name': 'enip device scan',
+        'name': 'Ethernet/IP device scan',
         'authors': [
             'wenzhe zhu <jtrkid[at]gmail.com>'  # icssploit module
         ],
@@ -79,5 +81,5 @@ class Exploit(exploits.Exploit):
         conf.verb = self.verbose
         self.exploit()
         unique_device = [list(x) for x in set(tuple(x) for x in self.result)]
-        print tabulate.tabulate(unique_device, headers=TABLE_HEADER)
+        print(tabulate.tabulate(unique_device, headers=TABLE_HEADER))
 

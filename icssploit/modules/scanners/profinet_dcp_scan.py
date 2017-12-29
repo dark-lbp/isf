@@ -8,7 +8,8 @@ from icssploit import (
 import threading
 from icssploit.thirdparty import tabulate
 from icssploit.protocols.pn_dcp import *
-from scapy.all import *
+from scapy.arch import get_if_hwaddr
+from scapy.sendrecv import sendp, sniff
 
 
 TABLE_HEADER = ['Device Name', 'Device Type', "MAC Address", "IP Address", "Netmask", "GateWay"]
