@@ -22,6 +22,7 @@ ISF is based on open source project [routersploit](https://github.com/reverse-sh
 | quantum_140_plc_control | exploits/plcs/schneider/quantum_140_plc_control.py                | Schneider Quantum 140 series PLC start/stop |
 | crash_qnx_inetd_tcp_service | exploits/plcs/qnx/crash_qnx_inetd_tcp_service.py              | QNX Inetd TCP service dos               |
 | qconn_remote_exec       | exploits/plcs/qnx/qconn_remote_exec.py                            | QNX qconn remote code execution         |
+| profinet_set_ip         | exploits/plcs/siemens/profinet_set_ip.py                          | Profinet DCP device IP config           |
 
 
 ## Scanner Module
@@ -30,6 +31,7 @@ ISF is based on open source project [routersploit](https://github.com/reverse-sh
 | profinet_dcp_scan       | scanners/profinet_dcp_scan.py                                     | Profinet DCP scanner                    |
 | vxworks_6_scan          | scanners/vxworks_6_scan.py                                        | Vxworks 6.x scanner                     |
 | s7comm_scan             | scanners/s7comm_scan.py                                           | S7comm scanner                          |
+| enip_scan               | scanners/enip_scan.py                                             | EthernetIP scanner                      |
 
 
 
@@ -159,8 +161,9 @@ You can use the tab key for completion.
 * [S7comm Client usage](docs/s7_client.en-us.md)
 * [SNMP_bruteforce usage](docs/snmp_bruteforce.en-us.md)
 * [S7 300/400 PLC password bruteforce usage](docs/s7_bruteforce.en-us.md)
-* [Vxworks 6.x Scanner useage](docs/vxworks_6_scan.en-us.md)
-* [Profient DCP Scanner useage](docs/profinet_dcp_scan.en-us.md)
-* [S7comm PLC Scanner useage](docs/s7comm_scan.en-us.md)
+* [Vxworks 6.x Scanner usage](docs/vxworks_6_scan.en-us.md)
+* [Profient DCP Scanner usage](docs/profinet_dcp_scan.en-us.md)
+* [S7comm PLC Scanner usage](docs/s7comm_scan.en-us.md)
+* [Profinet DCP Set ip module usage](docs/profinet_set_ip.en-us.md)
 * [Load modules from extra folder](docs/load_extra_modules_from_folder.en-us.md)
 * [How to write your own module](docs/how_to_create_module.en-us.md)

@@ -17,11 +17,12 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 ## Exploit 模块
 | Name                    | Path                                                              | Description                             |
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
-| s7_300_400_plc_control  | exploits/plcs/siemens/s7_300_400_plc_control.py | S7-300/400 PLC 启停脚本                  |
-| vxworks_rpc_dos         | exploits/plcs/vxworks/vxworks_rpc_dos.py               | Vxworks RPC 远程拒绝服务（CVE-2015-7599） |
-| quantum_140_plc_control | exploits/plcs/schneider/quantum_140_plc_control.py     | Schneider Quantum 140系列 PLC启停脚本    |
-| crash_qnx_inetd_tcp_service | exploits/plcs/qnx/crash_qnx_inetd_tcp_service.py | Crash QNX Inetd TCP Service |
-| qconn_remote_exec | exploits/plcs/qnx/qconn_remote_exec.py | QNX QCONN 远程代码执行 |
+| s7_300_400_plc_control  | exploits/plcs/siemens/s7_300_400_plc_control.py                   | S7-300/400 PLC 启停脚本                  |
+| vxworks_rpc_dos         | exploits/plcs/vxworks/vxworks_rpc_dos.py                          | Vxworks RPC 远程拒绝服务（CVE-2015-7599） |
+| quantum_140_plc_control | exploits/plcs/schneider/quantum_140_plc_control.py                | Schneider Quantum 140系列 PLC启停脚本    |
+| crash_qnx_inetd_tcp_service | exploits/plcs/qnx/crash_qnx_inetd_tcp_service.py              | Crash QNX Inetd TCP Service             |
+| qconn_remote_exec       | exploits/plcs/qnx/qconn_remote_exec.py                            | QNX QCONN 远程代码执行                    |
+| profinet_set_ip         | exploits/plcs/siemens/profinet_set_ip.py                          | Profinet DCP 设备 IP 配置                |
 
 
 ## Scanner 模块
@@ -30,6 +31,8 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 | profinet-dcp-scan       | scanners/profinet-dcp-scan.py                                     | Profinet DCP 扫描器                      |
 | vxworks_6_scan          | scanners/vxworks_6_scan.py                                        | Vxworks 6.x 扫描器                       |
 | s7comm_scan             | scanners/s7comm_scan.py                                           | S7comm 扫描器                            |
+| enip_scan               | scanners/enip_scan.py                                             | EthernetIP 扫描器                        |
+
 
 
 ## ICS 协议模块 (使用Scapy编写)
@@ -37,10 +40,10 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
  
 | Name                    | Path                                                              | Description                             |
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
-| pn_dcp                  | icssploit/protocols/pn_dcp                                        | Profinet DCP 协议                   |
-| modbus_tcp              | icssploit/protocols/modbus_tcp                                    | Modbus TCP 协议                     |
-| wdbrpc2                 | icssploit/protocols/wdbrpc2                                       | WDB RPC Version 2 协议              |
-| s7comm                  | icssploit/protocols/s7comm.py                                     | S7comm 协议                         |
+| pn_dcp                  | icssploit/protocols/pn_dcp                                        | Profinet DCP 协议                       |
+| modbus_tcp              | icssploit/protocols/modbus_tcp                                    | Modbus TCP 协议                         |
+| wdbrpc2                 | icssploit/protocols/wdbrpc2                                       | WDB RPC Version 2 协议                  |
+| s7comm                  | icssploit/protocols/s7comm.py                                     | S7comm 协议                             |
 
 
 # 安装
@@ -159,5 +162,6 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 * [Vxworks 6.x 扫描器使用说明](docs/vxworks_6_scan.zh-cn.md)
 * [Profient DCP 扫描使用说明](docs/profinet_dcp_scan.zh-cn.md)
 * [S7comm PLC 扫描器使用说明](docs/s7comm_scan.zh-cn.md)
+* [Profinet DCP IP 配置工具说明](docs/profinet_set_ip.zh-cn.md)
 * [从额外的目录中读取modules](docs/load_extra_modules_from_folder.zh-cn.md)
 * [如何创建一个module](docs/how_to_create_module.zh-cn.md)
