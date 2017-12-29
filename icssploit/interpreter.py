@@ -70,8 +70,10 @@ class BaseInterpreter(object):
         try:
             command_handler = getattr(self, "command_{}".format(command))
         except AttributeError:
-            raise icssploitException("Unknown command: '{}'".format(command))
-
+            try:
+                command_handler = getattr(self.current_module, "command_{}".format(command))
+            except AttributeError:
+                raise icssploitException("Unknown command: '{}'".format(command))
         return command_handler
 
     def start(self):
@@ -297,6 +299,9 @@ ICS Exploits:
         if self.current_module and GLOBAL_OPTS:
             return sorted(itertools.chain(self.module_commands, ('unsetg ',)))
         elif self.current_module:
+            custom_commands = [command.rsplit("_").pop() for command in dir(self.current_module)
+                               if command.startswith("command_")]
+            self.module_commands.extend(custom_commands)
             return self.module_commands
         else:
             return self.global_commands
