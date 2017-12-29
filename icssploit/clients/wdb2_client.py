@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 # coding:utf-8
 # Author: WenZhe Zhu
-from icssploit.core.base import Base
+from icssploit.clients.base import Base
 from icssploit.protocols.wdbrpc2 import *
 from icssploit.thirdparty import xdrlib
 from scapy.supersocket import StreamSocket
