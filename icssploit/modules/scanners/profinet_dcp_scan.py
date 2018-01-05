@@ -1,13 +1,11 @@
 from icssploit import (
     exploits,
-    print_success,
-    print_status,
-    print_error,
+    print_table,
     validators,
 )
 import threading
-from icssploit.thirdparty import tabulate
 from icssploit.protocols.pn_dcp import *
+from icssploit.utils import export_table
 from scapy.arch import get_if_hwaddr
 from scapy.sendrecv import sendp, sniff
 
@@ -75,5 +73,9 @@ class Exploit(exploits.Exploit):
         self.exploit(target_mac=PROFINET_BROADCAST_ADDRESS_2)
         self.sniff_finished.wait(self.timeout + 1)
         unique_device = [list(x) for x in set(tuple(x) for x in self.result)]
-        print tabulate.tabulate(unique_device, headers=TABLE_HEADER)
+        print_table(TABLE_HEADER, *unique_device)
 
+    def command_export(self, file_path, *args, **kwargs):
+        unique_device = [list(x) for x in set(tuple(x) for x in self.result)]
+        unique_device = sorted(unique_device)
+        export_table(file_path, TABLE_HEADER, unique_device)

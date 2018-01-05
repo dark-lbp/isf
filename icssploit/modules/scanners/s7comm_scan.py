@@ -3,12 +3,12 @@ from icssploit import (
     print_success,
     print_status,
     print_error,
+    print_table,
     validators,
 )
-from icssploit.thirdparty import tabulate
 from icssploit.clients.s7_client import S7Client
 from scapy.all import conf
-from nmap import *
+from icssploit.utils import port_scan, export_table
 
 TABLE_HEADER = ['Order Code', 'Module Type Name', "Firmware Version", "Module Name", "Serial Number", "Rack/Slot", "IP Address"]
 S7_DEVICES = []
@@ -39,20 +39,6 @@ class Exploit(exploits.Exploit):
                                   'if you want scan up to slot 5', validators=validators.integer)
     result = []
 
-    def scan(self, protocol):
-        nm = nmap.PortScanner()
-        try:
-            if protocol == "tcp" or protocol == "TCP":
-                nm.scan(hosts=self.target, ports=str(self.port), arguments='-n -sT ')
-                return nm
-            elif protocol == "udp" or protocol == "UDP":
-                print_status("UDP Scan requires root privileges will using sudo to scan target ")
-                nm.scan(hosts=self.target, ports=str(self.port), arguments='-n -sU ', sudo=True)
-                return nm
-        except Exception as err:
-            print_error(err)
-            return None
-
     def get_target_info(self, host, port):
         for rack_num in range(self.min_rack, self.max_rack + 1):
             for slot_num in range(self.min_slot, self.max_slot + 1):
@@ -79,7 +65,7 @@ class Exploit(exploits.Exploit):
     def run(self):
         self.result = []
         conf.verb = self.verbose
-        nm = self.scan(protocol='TCP')
+        nm = port_scan(protocol='TCP', target=self.target, port=self.port)
         for host in nm.all_hosts():
             if nm[host]['tcp'][self.port]['state'] == "open":
                 print_success("Host: %s, port:%s is open" % (host, self.port))
@@ -87,7 +73,12 @@ class Exploit(exploits.Exploit):
         unique_device = [list(x) for x in set(tuple(x) for x in self.result)]
         if len(self.result) > 0:
             print_success("Find %s targets" % len(self.result))
-            print(tabulate.tabulate(unique_device, headers=TABLE_HEADER))
+            print_table(TABLE_HEADER, *unique_device)
             print('\r')
         else:
             print_error("Didn't find any target on network %s" % self.target)
+
+    def command_export(self, file_path, *args, **kwargs):
+        unique_device = [list(x) for x in set(tuple(x) for x in self.result)]
+        unique_device = sorted(unique_device)
+        export_table(file_path, TABLE_HEADER, unique_device)

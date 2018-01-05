@@ -1,13 +1,12 @@
 from icssploit import (
     exploits,
     print_success,
-    print_status,
     print_error,
+    print_table,
     validators,
 )
-from icssploit.thirdparty import tabulate
 from icssploit.clients.wdb2_client import *
-from nmap import *
+from icssploit.utils import port_scan, export_table
 
 
 TABLE_HEADER = ['Target Type', 'VxWorks Version', "CPU Type", "CPU Model", "Memory Size", "IP Address"]
@@ -30,20 +29,6 @@ class Exploit(exploits.Exploit):
     port = exploits.Option(17185, 'WdbRPC port, default is 17185/UDP', validators=validators.integer)
     verbose = exploits.Option(0, 'Scapy verbose level, 0 to 2', validators=validators.integer)
     result = []
-
-    def scan(self, protocol):
-        nm = nmap.PortScanner()
-        try:
-            if protocol == "tcp" or protocol == "TCP":
-                nm.scan(hosts=self.target, ports=str(self.port), arguments='-n -sT ')
-                return nm
-            elif protocol == "udp" or protocol == "UDP":
-                print_status("UDP Scan requires root privileges will using sudo to scan target ")
-                nm.scan(hosts=self.target, ports=str(self.port), arguments='-n -sU ', sudo=True)
-                return nm
-        except Exception as err:
-            print_error(err)
-            return None
 
     @staticmethod
     def sizeof_fmt(num, suffix='B'):
@@ -77,10 +62,15 @@ class Exploit(exploits.Exploit):
 
     def run(self):
         conf.verb = self.verbose
-        nm = self.scan(protocol='UDP')
+        nm = port_scan(protocol='UDP', target=self.target, port=self.port)
         for host in nm.all_hosts():
             if nm[host]['udp'][self.port]['state'] == "open":
                 print_success("Host: %s, port:%s is open" % (host, self.port))
                 self.get_target_info(host=host, port=self.port)
         unique_device = [list(x) for x in set(tuple(x) for x in self.result)]
-        print tabulate.tabulate(unique_device, headers=TABLE_HEADER)
+        print_table(TABLE_HEADER, *unique_device)
+
+    def command_export(self, file_path, *args, **kwargs):
+        unique_device = [list(x) for x in set(tuple(x) for x in self.result)]
+        unique_device = sorted(unique_device)
+        export_table(file_path, TABLE_HEADER, unique_device)

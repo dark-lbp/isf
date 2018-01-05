@@ -1,9 +1,10 @@
 from icssploit import (
     exploits,
     validators,
+    print_table
 )
-from icssploit.thirdparty import tabulate
 from icssploit.protocols.enip import *
+from icssploit.utils import export_table
 import threading
 from scapy.layers.inet import Ether, IP, UDP
 from scapy.arch import get_if_hwaddr, get_if_addr
@@ -81,5 +82,9 @@ class Exploit(exploits.Exploit):
         conf.verb = self.verbose
         self.exploit()
         unique_device = [list(x) for x in set(tuple(x) for x in self.result)]
-        print(tabulate.tabulate(unique_device, headers=TABLE_HEADER))
+        print_table(TABLE_HEADER, *unique_device)
 
+    def command_export(self, file_path, *args, **kwargs):
+        unique_device = [list(x) for x in set(tuple(x) for x in self.result)]
+        unique_device = sorted(unique_device)
+        export_table(file_path, TABLE_HEADER, unique_device)
