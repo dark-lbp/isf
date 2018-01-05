@@ -12,6 +12,8 @@ import socket
 import string
 import sys
 import threading
+import nmap
+import time
 from abc import ABCMeta, abstractmethod
 from distutils.util import strtobool
 from functools import wraps
@@ -650,3 +652,36 @@ def mkdir_p(path):  # TODO: cover with tests
             print_success("Directory {path}".format(path=path))
         else:
             raise
+
+
+def port_scan(protocol, target, port):
+    nm = nmap.PortScanner()
+    try:
+        if protocol == "tcp" or protocol == "TCP":
+            nm.scan(hosts=target, ports=str(port), arguments='-n -sT ')
+            return nm
+        elif protocol == "udp" or protocol == "UDP":
+            print_status("UDP Scan requires root privileges will using sudo to scan target ")
+            nm.scan(hosts=target, ports=str(port), arguments='-n -sU ', sudo=True)
+            return nm
+    except Exception as err:
+        print_error(err)
+        return None
+
+
+def export_table(file_path, header, data, quote_char=';'):
+    if not file_path:
+        file_path = "./output_%s.csv" % (time.strftime("%Y%m%d-%H%M%S"))
+    try:
+        output_file = open(file_path, "w")
+    except Exception as err:
+        print_error("Can't export to %s" % file_path)
+        print(err)
+        return
+    header_line = quote_char.join(header) + '\r\n'
+    output_file.write(header_line)
+    for devices in data:
+        data_line = quote_char.join(devices) + '\r\n'
+        output_file.write(data_line)
+    output_file.close()
+    print_success("Table is export to %s" % file_path)
