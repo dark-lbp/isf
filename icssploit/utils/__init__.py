@@ -658,11 +658,11 @@ def port_scan(protocol, target, port):
     nm = nmap.PortScanner()
     try:
         if protocol == "tcp" or protocol == "TCP":
-            nm.scan(hosts=target, ports=str(port), arguments='-n -sT ')
+            nm.scan(hosts=target, ports=str(port), arguments='-Pn -sT ')
             return nm
         elif protocol == "udp" or protocol == "UDP":
             print_status("UDP Scan requires root privileges will using sudo to scan target ")
-            nm.scan(hosts=target, ports=str(port), arguments='-n -sU ', sudo=True)
+            nm.scan(hosts=target, ports=str(port), arguments='-Pn -sU ', sudo=True)
             return nm
     except Exception as err:
         print_error(err)
