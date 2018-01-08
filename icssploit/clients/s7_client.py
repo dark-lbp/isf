@@ -2,6 +2,7 @@
 # coding:utf-8
 # Author: WenZhe Zhu
 from icssploit.clients.base import Base
+from icssploit.protocols.cotp import *
 from icssploit.protocols.s7comm import *
 from scapy.supersocket import StreamSocket
 from icssploit.thirdparty.bitstring import BitArray
