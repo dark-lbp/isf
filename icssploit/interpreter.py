@@ -504,7 +504,7 @@ ICS Exploits:
         keyword = args[0]
 
         if not keyword:
-            utils.print_error("Please specify search keyword. e.g. 'search cisco'")
+            utils.print_error("Please specify search keyword. e.g. 'search plc'")
             return
 
         for module in self.modules:

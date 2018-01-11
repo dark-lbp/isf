@@ -147,8 +147,8 @@ def stop_after(space_number):
     Decorator counts number of spaces (' ') in line in order
     to determine when to stop.
 
-        ex. "use exploits/dlink/specific_module " -> stop complete after 2 spaces
-        "set rhost " -> stop completing after 2 spaces
+        ex. "use exploits/plcs/siemens/s7_300_400_plc_control.py " -> stop complete after 2 spaces
+        "set target " -> stop completing after 2 spaces
         "run " -> stop after 1 space
 
     :param space_number: number of spaces (' ') after which tab-completion should stop
@@ -657,10 +657,10 @@ def mkdir_p(path):  # TODO: cover with tests
 def port_scan(protocol, target, port):
     nm = nmap.PortScanner()
     try:
-        if protocol == "tcp" or protocol == "TCP":
+        if str(protocol).upper() == "TCP":
             nm.scan(hosts=target, ports=str(port), arguments='-Pn -sT ')
             return nm
-        elif protocol == "udp" or protocol == "UDP":
+        elif str(protocol).upper() == "UDP":
             print_status("UDP Scan requires root privileges will using sudo to scan target ")
             nm.scan(hosts=target, ports=str(port), arguments='-Pn -sU ', sudo=True)
             return nm
