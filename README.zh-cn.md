@@ -18,6 +18,7 @@ ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploi
 | Name                    | Path                                                              | Description                             |
 | ------------------------| ------------------------------------------------------------------|:---------------------------------------:|  
 | s7_300_400_plc_control  | exploits/plcs/siemens/s7_300_400_plc_control.py                   | S7-300/400 PLC 启停脚本                  |
+| s7_1200_plc_control     | exploits/plcs/siemens/s7_1200_plc_control.py                      | S7-1200 PLC 启停/重置                    |
 | vxworks_rpc_dos         | exploits/plcs/vxworks/vxworks_rpc_dos.py                          | Vxworks RPC 远程拒绝服务（CVE-2015-7599） |
 | quantum_140_plc_control | exploits/plcs/schneider/quantum_140_plc_control.py                | Schneider Quantum 140系列 PLC启停脚本    |
 | crash_qnx_inetd_tcp_service | exploits/plcs/qnx/crash_qnx_inetd_tcp_service.py              | Crash QNX Inetd TCP Service             |
