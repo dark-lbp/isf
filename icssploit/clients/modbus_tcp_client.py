@@ -3,7 +3,6 @@
 # Author: WenZhe Zhu
 from icssploit.clients.base import Base
 from icssploit.protocols.modbus_tcp import *
-from icssploit.thirdparty.bitstring import BitArray
 from scapy.supersocket import StreamSocket
 
 
@@ -113,10 +112,10 @@ class ModbusClient(Base):
             self.logger.error("Please create connect before receive packet!")
 
     @staticmethod
-    def bytes_list_to_bit_array(coils_bytes):
+    def bytes_to_bit_array(coils_bytes):
         bit_array = ""
         for data in coils_bytes:
-            bit_array += BitArray(bytes=chr(data), length=8).bin[::-1]  # Bit values (least significant bit is first coil!)
+            bit_array += '{:08b}'.format(ord(data))[::-1]
         return list(bit_array)
 
     def read_coils(self, address, count):
@@ -129,8 +128,8 @@ class ModbusClient(Base):
         packet = ModbusHeaderRequest(func_code=0x01) / ReadCoilsRequest(ReferenceNumber=address, BitCount=count)
         rsp = self.send_receive_modbus_packet(packet)
         if rsp:
-            coils = rsp.CoilStatus
-            coils = self.bytes_list_to_bit_array(coils)
+            coils = rsp.CoilsStatus
+            coils = self.bytes_to_bit_array(coils)
             return coils[:count]
         else:
             return None
@@ -146,7 +145,7 @@ class ModbusClient(Base):
         rsp = self.send_receive_modbus_packet(packet)
         if rsp:
             inputStatus = rsp.InputStatus
-            inputStatus = self.bytes_list_to_bit_array(inputStatus)
+            inputStatus = self.bytes_to_bit_array(inputStatus)
             return inputStatus[:count]
         else:
             return None

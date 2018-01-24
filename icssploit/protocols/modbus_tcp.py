@@ -27,7 +27,6 @@ modbus_exceptions = {
 
 
 class ModbusHeaderRequest(Packet):
-    name = "Modbus Header Req"
     fields_desc = [
         ShortField("trans_id", 0x0003),
         ShortField("proto_id", 0x0000),
@@ -51,7 +50,6 @@ class ModbusHeaderRequest(Packet):
 
 
 class ModbusHeaderResponse(Packet):
-    name = "Modbus Header Rsp"
     fields_desc = [
         ShortField("trans_id", 0x0003),
         ShortField("proto_id", 0x0000),
@@ -81,7 +79,6 @@ class ModbusHeaderResponse(Packet):
 
 # PDU 0x01
 class ReadCoilsRequest(Packet):
-    name = "Read_Coils_Req"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         ShortField("BitCount", 0x0000)  # Bit count (1-2000)
@@ -89,15 +86,14 @@ class ReadCoilsRequest(Packet):
 
 
 class ReadCoilsResponse(Packet):
-    name = "Read_Coils_Rsp"
     fields_desc = [
-        BitFieldLenField("ByteCount", None, 8, count_of="CoilStatus"),
-        FieldListField("CoilStatus", [0x00], ByteField("Data", 0x00), count_from=lambda pkt: pkt.ByteCount)]
+        BitFieldLenField("ByteCount", None, 8, count_of="CoilsStatus"),
+        StrLenField("CoilsStatus", '', length_from=lambda pkt: pkt.ByteCount)
+    ]
 
 
 # PDU 0x02
 class ReadDiscreteInputsRequest(Packet):
-    name = "Read Discrete Inputs"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         ShortField("BitCount", 0x0000)  # Bit count (1-2000)
@@ -105,7 +101,6 @@ class ReadDiscreteInputsRequest(Packet):
 
 
 class ReadDiscreteInputsResponse(Packet):
-    name = "Read Discrete Inputs Response"
     fields_desc = [
         BitFieldLenField("ByteCount", None, 8, count_of="InputStatus"),
         FieldListField("InputStatus", [0x00], ByteField("Data", 0x00), count_from=lambda pkt: pkt.ByteCount)]
@@ -113,7 +108,6 @@ class ReadDiscreteInputsResponse(Packet):
 
 # PDU 0x03
 class ReadHoldingRegistersRequest(Packet):
-    name = "Read_Holding_Registers_Req"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         ShortField("WordCount", 0x0000)
@@ -121,7 +115,6 @@ class ReadHoldingRegistersRequest(Packet):
 
 
 class ReadHoldingRegistersResponse(Packet):
-    name = "Read_Holding_Registers_Rsp"
     fields_desc = [
         FieldLenField("ByteCount", None, fmt="B", length_of="RegisterValue"),
         FieldListField("RegisterValue", None, ShortField("Data", 0x0),
@@ -131,7 +124,6 @@ class ReadHoldingRegistersResponse(Packet):
 
 # PDU 0x04
 class ReadInputRegistersRequest(Packet):
-    name = "Read_Input_Registers_Req"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         ShortField("WordCount", 0x0000)
@@ -139,7 +131,6 @@ class ReadInputRegistersRequest(Packet):
 
 
 class ReadInputRegistersResponse(Packet):
-    name = "Read Input Registers Response"
     fields_desc = [
         FieldLenField("ByteCount", None, fmt="B", length_of="RegisterValue"),
         FieldListField("RegisterValue", None, ShortField("data", 0x0),
@@ -149,7 +140,6 @@ class ReadInputRegistersResponse(Packet):
 
 # PDU 0x05
 class WriteSingleCoilRequest(Packet):
-    name = "Write_Single_Coil"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),  # from 0x0000 to 0xFFFF
         ShortField("Value", 0x0000)             # 0x0000 == Off, 0xFF00 == On
@@ -157,7 +147,6 @@ class WriteSingleCoilRequest(Packet):
 
 
 class WriteSingleCoilResponse(Packet):  # The answer is the same as the request if successful
-    name = "Write Single Coil"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),  # from 0x0000 to 0xFFFF
         ShortField("Value", 0x0000)             # 0x0000 == Off, 0xFF00 == On
@@ -166,7 +155,6 @@ class WriteSingleCoilResponse(Packet):  # The answer is the same as the request 
 
 # PDU 0x06
 class WriteSingleRegisterRequest(Packet):
-    name = "Write Single Register Request"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         ShortField("Value", 0x0000)
@@ -174,7 +162,6 @@ class WriteSingleRegisterRequest(Packet):
 
 
 class WriteSingleRegisterResponse(Packet):
-    name = "Write Single Register Response"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         ShortField("Value", 0x0000)
@@ -184,18 +171,15 @@ class WriteSingleRegisterResponse(Packet):
 # PDU 0x07
 # TODO: need fix this later
 # class ReadExceptionStatusRequest(Packet):
-#     name = "Read Exception Status"
 #     fields_desc = []
 #
 #
 # class ReadExceptionStatusResponse(Packet):
-#     name = "Read Exception Status Response"
 #     fields_desc = [ByteField("startingAddr", 0x00)]
 
 
 # PDU 0x0F
 class WriteMultipleCoilsRequest(Packet):
-    name = "Write_Multiple_Coils"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         FieldLenField("BitCount", None, fmt="H", count_of="Values"),  # Bit count (1-800)
@@ -205,7 +189,6 @@ class WriteMultipleCoilsRequest(Packet):
 
 
 class WriteMultipleCoilsResponse(Packet):
-    name = "Write_Multiple_Coils_Response"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         ShortField("BitCount", 0x0001)
@@ -214,7 +197,6 @@ class WriteMultipleCoilsResponse(Packet):
 
 # PDU 0x10
 class WriteMultipleRegistersRequest(Packet):
-    name = "Write_Multiple_Registers"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         FieldLenField("WordCount", None, fmt="H", count_of="Values"),  # Word count (1-100)
@@ -224,7 +206,6 @@ class WriteMultipleRegistersRequest(Packet):
 
 
 class WriteMultipleRegistersResponse(Packet):
-    name = "Write Multiple Registers Response"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         ShortField("WordCount", 0x0001)
@@ -237,7 +218,6 @@ class WriteMultipleRegistersResponse(Packet):
 
 # PDU 0x14
 class ReadFileSubRequest(Packet):
-    name = "Sub-request of Read File Record"
     fields_desc = [ByteField("RefType", 0x06),
                    ShortField("FileNumber", 0x0001),
                    ShortField("Offset", 0x0000),
@@ -246,7 +226,6 @@ class ReadFileSubRequest(Packet):
 
 
 class ReadFileRecordRequest(Packet):
-    name = "Read File Record"
     fields_desc = [
         FieldLenField("ByteCount", None, fmt="B", length_of="Groups", adjust=lambda pkt, x: x),
         PacketListField("Groups", [], ReadFileSubRequest, length_from=lambda p: p.ByteCount)
@@ -254,7 +233,6 @@ class ReadFileRecordRequest(Packet):
 
 
 class ReadFileSubResponse(Packet):
-    name = "Sub-response"
     fields_desc = [
         FieldLenField("ByteCount", None, fmt="B", length_of="Data", adjust=lambda pkt, x: x + 1),
         ByteField("RefType", 0x06),
@@ -264,7 +242,6 @@ class ReadFileSubResponse(Packet):
 
 
 class ReadFileRecordResponse(Packet):
-    name = "Read File Record Response"
     fields_desc = [
         FieldLenField("ByteCount", None, fmt="B", length_of="Values", adjust=lambda pkt, x: x),
         PacketListField("Groups", [], ReadFileSubResponse, length_from=lambda p: p.ByteCount)
@@ -273,7 +250,6 @@ class ReadFileRecordResponse(Packet):
 
 # PDU 0x15
 class WriteFileSubRequest(Packet):
-    name = "Sub request of Write File Record"
     fields_desc = [
         ByteField("RefType", 0x06),
         ShortField("FileNumber", 0x0001),
@@ -284,7 +260,6 @@ class WriteFileSubRequest(Packet):
 
 
 class WriteFileRecordRequest(Packet):
-    name = "Write File Record"
     fields_desc = [
         FieldLenField("ByteCount", None, fmt="B", length_of="Groups", adjust=lambda pkt, x: x),
         PacketListField("Groups", [], WriteFileSubRequest, length_from=lambda p: p.ByteCount)
@@ -292,7 +267,6 @@ class WriteFileRecordRequest(Packet):
 
 
 class WriteFileSubResponse(Packet):
-    name = "Sub response of Write File Record"
     fields_desc = [
         ByteField("RefType", 0x06),
         ShortField("FileNumber", 0x0001),
@@ -303,7 +277,6 @@ class WriteFileSubResponse(Packet):
 
 
 class WriteFileRecordResponse(Packet):
-    name = "Write File Record Response"
     fields_desc = [
         FieldLenField("ByteCount", None, fmt="B", length_of="Values", adjust=lambda pkt, x: x),
         PacketListField("Groups", [], WriteFileSubResponse, length_from=lambda p: p.ByteCount)
@@ -313,7 +286,6 @@ class WriteFileRecordResponse(Packet):
 # PDU 0x16
 class MaskWriteRegisterRequest(Packet):
     # and/or to 0xFFFF/0x0000 so that nothing is changed in memory
-    name = "Mask Write Register"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         XShortField("AndMask", 0xffff),
@@ -322,7 +294,6 @@ class MaskWriteRegisterRequest(Packet):
 
 
 class MaskWriteRegisterResponse(Packet):
-    name = "Mask Write Register Response"
     fields_desc = [
         ShortField("ReferenceNumber", 0x0000),
         XShortField("AndMask", 0xffff),
@@ -332,7 +303,6 @@ class MaskWriteRegisterResponse(Packet):
 
 # PDU 0x17
 class ReadWriteMultipleRegistersRequest(Packet):
-    name = "Read Write Multiple Registers"
     fields_desc = [
         ShortField("ReadReferenceNumber", 0x0000),
         ShortField("ReadWordCount", 0x0000),  # Word count for read (1-125)
@@ -345,7 +315,6 @@ class ReadWriteMultipleRegistersRequest(Packet):
 
 
 class ReadWriteMultipleRegistersResponse(Packet):
-    name = "Read Write Multiple Registers Response"
     fields_desc = [
         FieldLenField("ByteCount", None, fmt="B", length_of="RegisterValues"),
         FieldListField("RegisterValues", None, ShortField("data", 0x0),
@@ -355,12 +324,10 @@ class ReadWriteMultipleRegistersResponse(Packet):
 
 # PDU 0x18
 class ReadFIFOQueueRequest(Packet):
-    name = "Read FIFO Queue"
     fields_desc = [ShortField("ReferenceNumber", 0x0000)]
 
 
 class ReadFIFOQueueResponse(Packet):
-    name = "Read FIFO Queue Response"
     fields_desc = [
         FieldLenField("ByteCount", None, fmt="H", length_of="FIFOValues",
                       adjust=lambda pkt, p: p * 2 + 2),
@@ -372,7 +339,6 @@ class ReadFIFOQueueResponse(Packet):
 
 # Error packet
 class GenericError(Packet):
-    name = "Generic Error"
     fields_desc = [ByteEnumField("exceptCode", 1, modbus_exceptions)]
 
 

@@ -5,7 +5,6 @@ from icssploit.clients.base import Base
 from icssploit.protocols.cotp import *
 from icssploit.protocols.s7comm import *
 from scapy.supersocket import StreamSocket
-from icssploit.thirdparty.bitstring import BitArray
 import socket
 
 
@@ -645,7 +644,7 @@ class S7Client(Base):
     def bytes_to_bit_array(bytes_data):
         bit_array = ""
         for data in bytes_data:
-            bit_array += BitArray(bytes=data, length=8).bin
+            bit_array += '{:08b}'.format(ord(data))
         return map(int, list(bit_array))
 
     def _unpack_data_with_transport_size(self, req_item, rsp_item):
