@@ -1,38 +1,70 @@
-#! /usr/bin/env python
-# coding:utf-8
 from scapy.all import conf
 from scapy.packet import *
 from scapy.fields import *
 from scapy.layers.inet import TCP, UDP
-from icssploit.protocols.cip import CIPHeader
 
 
-ENIP_COMMANDS = {
-    0x0000: "NOP",
-    0x0004: "List Services",
-    0x0063: "List Identity",
-    0x0064: "List Interfaces",
-    0x0065: "Register Session",
-    0x0066: "Unregister Session",
-    0x006f: "Send RR Data",
-    0x0070: "Send Unit Data",
-    0x0072: "Indicate Status",
-    0x0073: "Cancel"
+CIP_TYPE = {
+    0x0: "Request",
+    0x1: "Response"
 }
 
 
-ENIP_TYPE_IDS = {
-    0x0000: "Null Address Item",
-    0x000c: "List Identity Response",
-    0x0086: "CIP Security Information",
-    0x00a1: "Connected Address Item",
-    0x00b1: "Connected Data Item",
-    0x00b2: "Unconnected Data Item",
-    0x0100: "List Services Response",
-    0x8000: "Socket Address Info O->T",
-    0x8001: "Socket Address Info T->O",
-    0x8002: "Sequenced Address Item",
-    0x8003: "Unconnected Message over UDP"
+CIP_SERVICE = {
+
+}
+
+
+CIP_PATH_TYPE = {
+    0x00: "Port Segment (0x00)",
+    0x01: "Logical Segment (0x01)",
+    0x02: "Network Segment (0x02)",
+    0x03: "Symbolic Segment (0x03)",
+    0x04: "Data Segment (0x04)",
+    0x05: "Constructed Data Type (0x05)",
+    0x06: "Elementary Data Type (0x06)",
+}
+
+
+CIP_LOGICAL_TYPE = {
+    0x00: "Class ID (0x00)",
+    0x01: "Instance ID (0x01)",
+    0x02: "Member ID (0x02)",
+    0x03: "Connection Point (0x03)",
+    0x04: "Attribute ID (0x04)",
+    0x05: "Special (0x05)",
+    0x06: "Service ID (0x06)",
+    0x07: "Extended Logical (0x07)"
+}
+
+
+CIP_LOGICAL_FORMAT = {
+    0x00: "8-bit Logical Segment (0x00)",
+    0x01: "16-bit Logical Segment (0x01)",
+    0x02: "32-bit Logical Segment (0x02)",
+    0x03: "Reserved (0x03)",
+}
+
+
+CIP_EXTENDED_LINK_ADDRESS = {
+    0x00: "False",
+    0x01: "True"
+}
+
+
+CIP_PORTS = {
+    0x00: "Reserved (0x00)",
+    0x01: "Backplane (0x01)"
+}
+
+
+CIP_STATUS = {
+    0x00: "Success (0x00)"
+}
+
+
+CIP_EXTENDED_DEVICE_STATUS = {
+    0x00: ""
 }
 
 
@@ -1260,7 +1292,6 @@ VENDOR_IDS = {
     0x04D8: "Penko Engineering B.V.(0x04D8)",
 }
 
-
 DEVICE_TYPES = {
     0x0000: "Generic Device (deprecated)(0x0000)",
     0x0002: "AC Drive(0x0002)",
@@ -1301,186 +1332,150 @@ DEVICE_TYPES = {
 }
 
 
-STATUS_CODES = {
-    0x0000: "Success",
-    0x0001: "Invalid Command",
-    0x0002: "No Memory Resources",
-    0x0003: "Incorrect Data",
-    0x0064: "Invalid Session Handle",
-    0x0065: "Invalid Length",
-    0x0069: "Unsupported Protocol Revision",
-    0x006a: "Encapsulated CIP service not allowed on this port"
-
-}
-
-
-CAPABILITY_FLAGS = [
-    "UDP",  # Supports CIP Class 0 or 1 via
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "TCP",  # Supports CIP Encapsulation via TCP
-    "",
-    ""]
-
-
-ENIP_INTERFACE_HANDLE = {
-    0x00: "CIP (0x00000000)"
-}
-
-
-class CommandSpecificDataItemsField(PacketListField):
+class CIPSegmentField(PacketField):
     def m2i(self, pkt, payload):
         return self.cls(pkt, payload)
 
 
-def guess_cmd_type_class(pkt, payload):
-    if isinstance(pkt, CommandSpecificData) or isinstance(pkt, CIPCommandSpecificData):
+# def guess_cip_segment_class(pkt, payload):
+#     if isinstance(pkt, CIPRequestPath):
+#         if pkt.LogicalSegmentFormat == 0x01:
+#             return CIPClassSegmentField(payload)
+#         elif pkt.LogicalSegmentFormat == 0x00:
+#             return CIPClassSegmentField
+#
+
+
+def guess_cip_message_class(pkt, payload):
+    if isinstance(pkt, CIPConnectionManager):
         try:
-            type_id = struct.unpack("<H", payload[:2])[0]
+            message_class = CIPHeader(payload)
+            if message_class.haslayer(CIPHeader):
+                return CIPHeader(payload)
         except Exception as err:
-            return
-        if type_id == 0x000c:
-            return ListIdentityResponse(payload)
-        elif type_id == 0x0100:
-            return ListServiceResponse(payload)
-        elif type_id == 0x0000:
-            return NullAddressItem(payload)
-        elif type_id == 0x00b2:
-            return UnconnectedDataItem(payload)
+            return payload
+
+        return payload
 
 
-class SocketAddress(Packet):
+class CIPMessageRequestField(PacketLenField):
+    def m2i(self, pkt, payload):
+        return self.cls(pkt, payload)
+
+
+class CIPHeaderDataField(PacketField):
+    def m2i(self, pkt, payload):
+        return self.cls(pkt, payload)
+
+
+def is_cip_response_packet(pkt):
+    if pkt.Type == 0x01:
+        return True
+    return False
+
+
+class CIPRequestPath(Packet):
     fields_desc = [
-        LEShortEnumField("SinFamily", 0x0000, ENIP_TYPE_IDS),
-        LEShortField("SinPort", 0x0),
-        IPField("SinAddress", "0.0.0.0"),
-        XLongField("SinZero", 0)
-        ]
-
-
-bind_layers(SocketAddress, Padding)
-
-
-class RegisterSession(Packet):
-    fields_desc = [
-        LEShortField("ENIPVersion", 0x0001),
-        # TODO: Need to know what does these flags doing for.
-        LEShortField("OptionFlags", 0x0000)
+        BitEnumField("PathSegmentType", 0, 3, CIP_PATH_TYPE),
+        BitEnumField("LogicalSegmentType", 0, 3, CIP_LOGICAL_TYPE),
+        BitEnumField("LogicalSegmentFormat", 0, 2, CIP_LOGICAL_FORMAT),
+        ConditionalField(XByteField("Padding", 0x00),
+                         lambda pkt: True if pkt.LogicalSegmentFormat == 1 else False),
+        ConditionalField(LEShortField("ClassSegment", 0x00),
+                         lambda pkt: True if pkt.LogicalSegmentFormat == 1 else False),
+        ConditionalField(ByteField("InstanceSegment", 0x00),
+                         lambda pkt: True if pkt.LogicalSegmentFormat == 0 else False)
     ]
 
 
-class ListServiceResponse(Packet):
+bind_layers(CIPRequestPath, Padding)
+
+
+class StatusAttribute(Packet):
     fields_desc = [
-        LEShortEnumField("TypeID", 0x0004, ENIP_TYPE_IDS),
-        LEShortField("Length", None),
-        LEShortField("ENIPVersion", 0x0001),
-        FlagsField("CapabilityFlags", 0, 16, CAPABILITY_FLAGS),
-        # TODO: Need check is Name of service always end with '\x00\x00' or not.
-        StrLenField("NameOfService", "", length_from=lambda p: p.Length - 4)
+        BitEnumField("ExtendedDeviceStatus2", 0, 4, CIP_EXTENDED_DEVICE_STATUS),
+        BitField("MajorUnrecoverableFault", 0, 1),
+        BitField("MajorRecoverableFault", 0, 1),
+        BitField("MinorUnrecoverableFault", 0, 1),
+        BitField("MinorRecoverableFault", 0, 1),
+        BitEnumField("ExtendedDeviceStatus", 0, 4, CIP_EXTENDED_DEVICE_STATUS),
+        BitField("Unused1", 0, 1),
+        BitField("Configured", 0, 1),
+        BitField("Unused2", 0, 1),
+        BitField("Owned", 0, 1)
     ]
 
 
-class ListIdentityResponse(Packet):
+bind_layers(StatusAttribute, Padding)
+
+
+class GetAttributesAll(Packet):
     fields_desc = [
-        LEShortEnumField("TypeID", 0x0004, ENIP_TYPE_IDS),
-        LEShortField("Length", None),
-        LEShortField("ENIPVersion", 0x0001),
-        PacketField("SocketAddress", SocketAddress(), SocketAddress),
-        LEShortEnumField("VendorID", 0x0001, VENDOR_IDS),
-        LEShortEnumField("DeviceType", 0x000c, DEVICE_TYPES),
-        LEShortField("ProductCode", 0x0087),
-        XShortField("Revision", 0x0),
-        LEShortEnumField("Status", 0x0080, DEVICE_TYPES),
+        LEShortEnumField("VendorID", 0x004d, VENDOR_IDS),
+        LEShortEnumField("DeviceType", 0x000b, DEVICE_TYPES),
+        LEShortField("ProductCode", 0x0001),
+        ByteField("MajorRevision", 0x01),
+        ByteField("MinorRevision", 0x01),
+        PacketField("Status", StatusAttribute(), StatusAttribute),
         LEIntField("SerialNumber", 0x0),
         FieldLenField("ProductNameLength", None, fmt="B", length_of="ProductName"),
         StrLenField("ProductName", "", length_from=lambda p: p.ProductNameLength),
-        ByteField("State", 0x0)
-        ]
-
-
-class NullAddressItem(Packet):
-    fields_desc = [
-        LEShortEnumField("TypeID", 0x0000, ENIP_TYPE_IDS),
-        LEShortField("Length", 0x00),
     ]
 
 
-bind_layers(NullAddressItem, Padding)
-
-
-class UnconnectedDataItem(Packet):
+class CIPRoutePath(Packet):
     fields_desc = [
-        LEShortEnumField("TypeID", 0x00b2, ENIP_TYPE_IDS),
-        LEShortField("Length", None),
+        BitEnumField("PathSegmentType", 0, 3, CIP_PATH_TYPE),
+        BitEnumField("ExtendedLinkAddress", 0, 1, CIP_EXTENDED_LINK_ADDRESS),
+        BitEnumField("Port", 0, 4, CIP_PORTS),
+        ByteField("PortSegment", 0x00)
     ]
 
 
-bind_layers(UnconnectedDataItem, Padding)
-
-
-class ENIPHeader(Packet):
+class CIPConnectionManager(Packet):
     fields_desc = [
-        LEShortEnumField("Command", 0x0004, ENIP_COMMANDS),
-        LEShortField("Length", None),
-        LEIntField("Session", 0x00000000),
-        LEIntEnumField("Status", 0x00000000, STATUS_CODES),
-        StrFixedLenField(
-            "SenderContext", '0000000000000000'.decode('hex'), length=8),
-        XIntField("Options", 0x00000000)
+        BitField("Unused", 0, 3),
+        BitField("Priority", 0, 1),
+        BitField("TickTime", 6, 4),
+        ByteField("TimeoutTicks", 0x9a),
+        FieldLenField("MessageRequestSize", None, fmt="<H", length_of="MessageRequest", adjust=lambda pkt, x: x),
+        CIPMessageRequestField("MessageRequest", [], guess_cip_message_class, length_from=lambda pkt: pkt.MessageRequestSize),
+        FieldLenField("RoutePathSize", None, fmt="B", length_of="RoutePath", adjust=lambda pkt, x: x / 2),
+        XByteField("Reserved", 0x00),
+        PacketLenField("RoutePath", CIPRoutePath(), CIPRoutePath, length_from=lambda pkt: pkt.RoutePathSize * 2)
     ]
 
-    def post_build(self, p, pay):
-        if self.Length is None and pay:
-            length = len(pay)
-            p = p[:2] + struct.pack("<H", length) + p[4:]
-        return p + pay
+
+class CIPHeader(Packet):
+    fields_desc = [
+        BitEnumField("Type", 0, 1, CIP_TYPE),
+        BitEnumField("Service", 0, 7, CIP_SERVICE),
+        ConditionalField(
+            FieldLenField("RequestPathSize", None, fmt="B", length_of="RequestPath", adjust=lambda pkt, x: x / 2),
+            lambda pkt: True if is_cip_response_packet(pkt) is False else True
+        ),
+        ConditionalField(
+            PacketListField("RequestPath", [], CIPRequestPath, length_from=lambda pkt: pkt.RequestPathSize * 2),
+            lambda pkt: True if is_cip_response_packet(pkt) is False else True
+        ),
+        ConditionalField(
+            ByteEnumField("GeneralStatus", 0x0, CIP_STATUS),
+            lambda pkt: True if is_cip_response_packet(pkt) is True else False
+        ),
+        ConditionalField(
+            FieldLenField("AdditionalStatusSize", None, fmt="B", length_of="AdditionalStatus", adjust=lambda pkt, x: x / 2),
+            lambda pkt: True if is_cip_response_packet(pkt) is True else False
+        ),
+        ConditionalField(
+            StrLenField("AdditionalStatus", "", length_from=lambda pkt: pkt.AdditionalStatusSize * 2),
+            lambda pkt: True if is_cip_response_packet(pkt) is True else False
+        ),
+
+    ]
 
     def guess_payload_class(self, payload):
-        if len(payload) == 4:
-            return RegisterSession
-        elif payload[:4] == '\x00\x00\x00\x00':
-            return CIPCommandSpecificData
-        else:
-            return CommandSpecificData
+        if self.Type == 0x00:
+            return CIPConnectionManager
+        elif self.Type == 0x01 and self.Service == 0x01:
+            return GetAttributesAll
 
-
-class CommandSpecificData(Packet):
-    fields_desc = [FieldLenField("ItemCount", None, fmt="<H", count_of="Items"),
-                   CommandSpecificDataItemsField("Items", [], guess_cmd_type_class, count_from=lambda p:p.ItemCount)
-                   ]
-
-
-class CIPCommandSpecificData(Packet):
-    fields_desc = [
-        IntEnumField("InterfaceHandle", 0x00, ENIP_INTERFACE_HANDLE),
-        LEShortField("Timeout", 0x0a),
-        FieldLenField("ItemCount", None, fmt="<H", count_of="Items"),
-        CommandSpecificDataItemsField("Items", [], guess_cmd_type_class, count_from=lambda p:p.ItemCount)
-    ]
-
-    def post_build(self, pkt, pay):
-        if isinstance(self.Items[-1], UnconnectedDataItem):
-            if self.Items[-1].Length is None and pay:
-                length = len(pay)
-                pkt = pkt[:-2] + struct.pack("<H", length)
-        return pkt + pay
-
-    def guess_payload_class(self, payload):
-        if self.InterfaceHandle == 0x00:
-            return CIPHeader
-
-
-bind_layers(TCP, ENIPHeader, dport=44818)
-bind_layers(TCP, ENIPHeader, sport=44818)
-bind_layers(UDP, ENIPHeader, dport=44818)
-bind_layers(UDP, ENIPHeader, sport=44818)
