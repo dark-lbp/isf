@@ -4,3 +4,4 @@ beautifulsoup4>=4.4.1
 pysnmp>=4.3.2
 gnureadline>=6.3.3
 python-nmap
+scapy
