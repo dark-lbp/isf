@@ -87,7 +87,7 @@ class ReadCoilsRequest(Packet):
 
 class ReadCoilsResponse(Packet):
     fields_desc = [
-        BitFieldLenField("ByteCount", None, 8, count_of="CoilsStatus"),
+        BitFieldLenField("ByteCount", None, 8, length_of="CoilsStatus"),
         StrLenField("CoilsStatus", '', length_from=lambda pkt: pkt.ByteCount)
     ]
 
