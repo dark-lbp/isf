@@ -6,6 +6,7 @@ from scapy.packet import *
 from scapy.fields import *
 from scapy.layers.inet import TCP
 from icssploit.protocols.s7comm import S7Header
+from icssploit.protocols.s7comm_plus import S7PlusHeader
 
 
 COTP_PARAMETER_CODE = {0xc0: "tpdu-size", 0xc1: "src-tsap", 0xc2: "dst-tsap"}
@@ -81,6 +82,8 @@ class COTPDT(Packet):
     def guess_payload_class(self, payload):
         if payload[0] == '\x32':
             return S7Header
+        elif payload[0] == '\x72':
+            return S7PlusHeader
 
 
 bind_layers(TCP, TPKT, dport=102)
