@@ -1,9 +1,14 @@
 # 框架介绍
-ISF(Industrial Exploitation Framework)，是一款基于python编写的类似metasploit的工控漏洞利用框架。
+ISF(Industrial Exploitation Framework)，是一款基于python编写的类似metasploit的工控安全测试框架。
 
 ISF基于开源项目[routersploit](https://github.com/reverse-shell/routersploit)修改而来。
 
 *该文档的其他语言版本: [English](README.md), [简体中文](README.zh-cn.md),*
+
+
+## 免责声明
+未经事先双方同意，使用ISF对目标进行攻击性测试是非法的。最终用户有责任遵守所有适用的地方、州和联邦法律。
+开发人员对使用该程序造成的任何损害不承担责任。
 
 
 ## 工控协议客户端
