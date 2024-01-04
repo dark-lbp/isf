@@ -56,7 +56,9 @@ These protocol can used in other Fuzzing framework like [Kitty](https://github.c
 # Install
 
 ## Python requirements
+(you can use `pip install -r requirements.txt`)
 * gnureadline (OSX only)
+* configparser
 * requests
 * paramiko
 * beautifulsoup4
